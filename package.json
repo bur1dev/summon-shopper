@@ -1,0 +1,37 @@
+{
+  "name": "summon-shopper-app-dev",
+  "private": true,
+  "workspaces": [
+    "ui",
+    "tests"
+  ],
+  "scripts": {
+    "start": "AGENTS=2 npm run network",
+    "network": "npm run build:happ && concurrently -k \"UI_PORT=1420 npm start -w ui\" \"npm run launch\"",
+    "test": "npm run build:zomes && hc app pack workdir --recursive && npm run test --workspace tests",
+    "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/summon-shopper-app.happ",
+    "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) npm run network:tauri",
+    "network:tauri": "hc sandbox clean && npm run build:happ && UI_PORT=$(get-port) concurrently \"npm run start --workspace ui\" \"npm run launch:tauri\" \"hc playground\"",
+    "launch:tauri": "concurrently \"kitsune2-bootstrap-srv --listen \"127.0.0.1:$BOOTSTRAP_PORT\"\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/summon-shopper-app.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$BOOTSTRAP_PORT\"\"",
+    "package": "npm run build:happ && npm run package --workspace ui && hc web-app pack workdir --recursive",
+    "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
+    "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown --workspace --exclude summon-shopper-app-tauri",
+    "network:android": "npm run build:happ && concurrently -k \"UI_PORT=1420 npm start -w ui\" \"npm run tauri dev\" \"npm run tauri android dev\"",
+    "launch": "concurrently-repeat \"npm run tauri dev --no-watch\" $AGENTS",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@holochain/hc-spin": "^0.500.0",
+    "concurrently": "^8.2.2",
+    "get-port-cli": "^3.0.0",
+    "@tauri-apps/cli": "^2.0.0",
+    "concurrently-repeat": "^0.0.1",
+    "new-port-cli": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "hcScaffold": {
+    "template": "svelte"
+  }
+}

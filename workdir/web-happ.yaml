@@ -1,0 +1,6 @@
+manifest_version: '1'
+name: summon-shopper-app
+ui:
+  bundled: ../ui/dist.zip
+happ_manifest:
+  bundled: ./summon-shopper-app.happ
