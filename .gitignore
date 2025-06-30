@@ -24,3 +24,6 @@
 .hc*
 .running
 .hc
+
+# symlinked shared DNAs (managed in summon-dnas repo)
+/dnas

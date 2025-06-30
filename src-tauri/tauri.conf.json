@@ -4,7 +4,7 @@
   "identifier": "dev.bur1.summonshopper",
   "build": {
     "beforeBuildCommand": "npm run build:happ && npm run build -w ui",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://192.168.0.119:1420",
     "frontendDist": "../ui/dist"
   },
   "app": {

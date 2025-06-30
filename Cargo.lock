@@ -984,6 +984,7 @@ dependencies = [
  "cart_integrity",
  "hdk",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2979,6 +2980,27 @@ dependencies = [
  "serde_bytes",
  "sodoken",
  "tokio",
+]
+
+[[package]]
+name = "hc_zome_profiles_coordinator"
+version = "0.2.0"
+source = "git+https://github.com/holochain-open-dev/profiles?branch=main-0.5#c264bd82c5e263d17b15bd6f5b539b38e91401f9"
+dependencies = [
+ "derive_more 0.99.20",
+ "hc_zome_profiles_integrity",
+ "hdk",
+ "serde",
+]
+
+[[package]]
+name = "hc_zome_profiles_integrity"
+version = "0.2.0"
+source = "git+https://github.com/holochain-open-dev/profiles?branch=main-0.5#c264bd82c5e263d17b15bd6f5b539b38e91401f9"
+dependencies = [
+ "derive_more 0.99.20",
+ "hdi",
+ "serde",
 ]
 
 [[package]]
@@ -6407,6 +6429,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02b3e5e68a3a1a02aad3ec490a98007cbc13c37cbe84a3cd7b8e406d76e7f778"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "products"
+version = "0.0.1"
+dependencies = [
+ "hdk",
+ "products_integrity",
+ "serde",
+]
+
+[[package]]
+name = "products_integrity"
+version = "0.0.1"
+dependencies = [
+ "hdi",
+ "serde",
+]
+
+[[package]]
+name = "profiles"
+version = "0.0.1"
+dependencies = [
+ "hc_zome_profiles_coordinator",
+ "hdk",
+ "profiles_integrity",
+ "serde",
+]
+
+[[package]]
+name = "profiles_integrity"
+version = "0.0.1"
+dependencies = [
+ "hc_zome_profiles_integrity",
+ "hdi",
+ "serde",
 ]
 
 [[package]]
