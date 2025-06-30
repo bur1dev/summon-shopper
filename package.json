@@ -8,14 +8,13 @@
   "scripts": {
     "start": "AGENTS=2 npm run network",
     "network": "npm run build:happ && concurrently -k \"UI_PORT=1420 npm start -w ui\" \"npm run launch\"",
-    "test": "npm run build:zomes && hc app pack workdir --recursive && npm run test --workspace tests",
+    "test": "hc app pack workdir && npm run test --workspace tests",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/summon-shopper-app.happ",
     "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) npm run network:tauri",
     "network:tauri": "hc sandbox clean && npm run build:happ && UI_PORT=$(get-port) concurrently \"npm run start --workspace ui\" \"npm run launch:tauri\" \"hc playground\"",
     "launch:tauri": "concurrently \"kitsune2-bootstrap-srv --listen \"127.0.0.1:$BOOTSTRAP_PORT\"\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/summon-shopper-app.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$BOOTSTRAP_PORT\"\"",
-    "package": "npm run build:happ && npm run package --workspace ui && hc web-app pack workdir --recursive",
-    "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
-    "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown --workspace --exclude summon-shopper-app-tauri",
+    "package": "npm run build:happ && npm run package --workspace ui && hc web-app pack workdir",
+    "build:happ": "hc app pack workdir",
     "network:android": "npm run build:happ && concurrently -k \"UI_PORT=1420 npm start -w ui\" \"npm run tauri dev\" \"npm run tauri android dev\"",
     "launch": "concurrently-repeat \"npm run tauri dev --no-watch\" $AGENTS",
     "tauri": "tauri"
