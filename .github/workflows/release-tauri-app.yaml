@@ -45,9 +45,9 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          artifacts: "workdir/summon-shopper-app.happ"
+          artifacts: "workdir/summon-shopper.happ"
           body: "See assets below to download and install this version."
-          name: Summon Shopper App v${{ steps.version.outputs.APP_VERSION }}
+          name: Summon Shopper v${{ steps.version.outputs.APP_VERSION }}
           tag: v${{ steps.version.outputs.APP_VERSION }}
           prerelease: true
           draft: true
@@ -127,7 +127,7 @@ jobs:
         with: 
           token: ${{ secrets.GITHUB_TOKEN }}
           releaseId: ${{ needs.publish-happ.outputs.releaseId }}
-          fileName: 'summon-shopper-app.happ'
+          fileName: 'summon-shopper.happ'
           out-file-path: 'workdir/'
 
       - name: build the app
@@ -180,7 +180,7 @@ jobs:
         with: 
           token: ${{ secrets.GITHUB_TOKEN }}
           releaseId: ${{ needs.publish-happ.outputs.releaseId }}
-          fileName: 'summon-shopper-app.happ'
+          fileName: 'summon-shopper.happ'
           out-file-path: '.'
 
       - name: setup Android signing

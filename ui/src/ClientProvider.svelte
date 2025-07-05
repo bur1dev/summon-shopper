@@ -1,11 +1,6 @@
 <script lang="ts">
 import { onMount, setContext } from "svelte";
 import { CLIENT_CONTEXT_KEY, createClientStore } from "./contexts";
-interface Props {
-  children?: import("svelte").Snippet;
-}
-
-let { children }: Props = $props();
 
 const clientStore = createClientStore();
 setContext(CLIENT_CONTEXT_KEY, clientStore);
@@ -14,7 +9,12 @@ onMount(() => {
   clientStore.connect();
 });
 
-let { client, error, loading } = $derived($clientStore);
+// Svelte 4 reactive variables
+let client: any;
+let error: any;
+let loading: boolean;
+
+$: ({ client, error, loading } = $clientStore);
 </script>
 
 {#if loading}
@@ -24,5 +24,5 @@ let { client, error, loading } = $derived($clientStore);
     Error connecting to Holochain: {error.message}
   </div>
 {:else if client}
-  {@render children?.()}
+  <slot />
 {/if}

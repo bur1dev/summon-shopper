@@ -1,5 +1,5 @@
 [package]
-name = "summon-shopper-app-tauri"
+name = "summon-shopper-tauri"
 version = "0.0.0"
 description = "Summon Shopper App"
 authors = ["you"]

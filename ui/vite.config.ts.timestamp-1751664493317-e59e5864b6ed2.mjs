@@ -1,0 +1,20 @@
+// vite.config.ts
+import { svelte } from "file:///home/bur1/Holochain/summon-shopper/ui/node_modules/@sveltejs/vite-plugin-svelte/src/index.js";
+import { defineConfig } from "file:///home/bur1/Holochain/summon-shopper/ui/node_modules/vite/dist/node/index.js";
+var vite_config_default = defineConfig({
+  server: {
+    port: 1420,
+    strictPort: true,
+    host: "0.0.0.0",
+    hmr: process.env.TAURI_DEV_HOST ? {
+      protocol: "ws",
+      host: process.env.TAURI_DEV_HOST,
+      port: 1430
+    } : void 0
+  },
+  plugins: [svelte()]
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvaG9tZS9idXIxL0hvbG9jaGFpbi9zdW1tb24tc2hvcHBlci91aVwiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9maWxlbmFtZSA9IFwiL2hvbWUvYnVyMS9Ib2xvY2hhaW4vc3VtbW9uLXNob3BwZXIvdWkvdml0ZS5jb25maWcudHNcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfaW1wb3J0X21ldGFfdXJsID0gXCJmaWxlOi8vL2hvbWUvYnVyMS9Ib2xvY2hhaW4vc3VtbW9uLXNob3BwZXIvdWkvdml0ZS5jb25maWcudHNcIjtpbXBvcnQgeyBzdmVsdGUgfSBmcm9tIFwiQHN2ZWx0ZWpzL3ZpdGUtcGx1Z2luLXN2ZWx0ZVwiO1xuaW1wb3J0IHsgZGVmaW5lQ29uZmlnIH0gZnJvbSBcInZpdGVcIjtcblxuLy8gaHR0cHM6Ly92aXRlanMuZGV2L2NvbmZpZy9cbmV4cG9ydCBkZWZhdWx0IGRlZmluZUNvbmZpZyh7XG4gIHNlcnZlcjoge1xuICAgIHBvcnQ6IDE0MjAsXG4gICAgc3RyaWN0UG9ydDogdHJ1ZSxcbiAgICBob3N0OiAnMC4wLjAuMCcsXG4gICAgaG1yOiBwcm9jZXNzLmVudi5UQVVSSV9ERVZfSE9TVFxuICAgICAgPyB7XG4gICAgICAgIHByb3RvY29sOiBcIndzXCIsXG4gICAgICAgIGhvc3Q6IHByb2Nlc3MuZW52LlRBVVJJX0RFVl9IT1NULFxuICAgICAgICBwb3J0OiAxNDMwLFxuICAgICAgfVxuICAgICAgOiB1bmRlZmluZWQsXG4gIH0sXG4gIHBsdWdpbnM6IFtzdmVsdGUoKV0sXG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFBb1MsU0FBUyxjQUFjO0FBQzNULFNBQVMsb0JBQW9CO0FBRzdCLElBQU8sc0JBQVEsYUFBYTtBQUFBLEVBQzFCLFFBQVE7QUFBQSxJQUNOLE1BQU07QUFBQSxJQUNOLFlBQVk7QUFBQSxJQUNaLE1BQU07QUFBQSxJQUNOLEtBQUssUUFBUSxJQUFJLGlCQUNiO0FBQUEsTUFDQSxVQUFVO0FBQUEsTUFDVixNQUFNLFFBQVEsSUFBSTtBQUFBLE1BQ2xCLE1BQU07QUFBQSxJQUNSLElBQ0U7QUFBQSxFQUNOO0FBQUEsRUFDQSxTQUFTLENBQUMsT0FBTyxDQUFDO0FBQ3BCLENBQUM7IiwKICAibmFtZXMiOiBbXQp9Cg==

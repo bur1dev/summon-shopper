@@ -5,12 +5,17 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = ["src-tauri"]
+members = [
+  "src-tauri",
+  "dnas/cart/zomes/coordinator/cart",
+  "dnas/cart/zomes/integrity/cart"
+]
 resolver = "2"
 
 [workspace.dependencies]
-hdi = "=0.6.2"
-hdk = "=0.5.2"
+hdi = "=0.6.3"
+hdk = "=0.5.3"
+holochain_serialized_bytes = "*"
 holochain_types = "0.3.2"
 mio = "0.8"
 serde = "1.0"
@@ -20,12 +25,6 @@ path = "dnas/cart/zomes/coordinator/cart"
 
 [workspace.dependencies.cart_integrity]
 path = "dnas/cart/zomes/integrity/cart"
-
-[workspace.dependencies.profiles]
-path = "dnas/cart/zomes/coordinator/profiles"
-
-[workspace.dependencies.profiles_integrity]
-path = "dnas/cart/zomes/integrity/profiles"
 
 [workspace.dependencies.tokio]
 features = ["full"]

@@ -1,6 +1,9 @@
 import App from "./App.svelte";
+import "./app.css";
 
-import "./index.css";
-import { mount } from "svelte";
+// Svelte 4 app initialization
+const app = new App({
+  target: document.getElementById("app")!,
+});
 
-export default mount(App, { target: document.body });
+export default app;

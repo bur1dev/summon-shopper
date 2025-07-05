@@ -8,11 +8,11 @@ use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 #[cfg(not(mobile))]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 
-const APP_ID: &'static str = "summon-shopper-app";
+const APP_ID: &'static str = "summon-shopper";
 
 pub fn happ_bundle() -> AppBundle {
-    let bytes = include_bytes!("../../workdir/summon-shopper-app.happ");
-    AppBundle::decode(bytes).expect("Failed to decode summon-shopper-app happ")
+    let bytes = include_bytes!("../../workdir/summon-shopper.happ");
+    AppBundle::decode(bytes).expect("Failed to decode summon-shopper happ")
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -36,13 +36,13 @@ pub fn run() {
 
                 // After set up we can be sure our app is installed and up to date, so we can just open it
                 let mut window_builder = app.holochain()?
-                    .main_window_builder(String::from("main"), false, Some(String::from("summon-shopper-app")), None)
+                    .main_window_builder(String::from("main"), false, Some(String::from("summon-shopper")), None)
                     .await?;
 
                 #[cfg(not(mobile))]
                 {
                     window_builder = window_builder
-                        .title(String::from("Summon Shopper App"))
+                        .title(String::from("Summon Shopper"))
                         .inner_size(1200.0, 800.0)
                         .menu(
                             Menu::with_items(
@@ -179,7 +179,7 @@ fn holochain_dir() -> PathBuf {
             app_dirs2::app_root(
                 app_dirs2::AppDataType::UserCache,
                 &app_dirs2::AppInfo {
-                    name: "summon-shopper-app",
+                    name: "summon-shopper",
                     author: std::env!("CARGO_PKG_AUTHORS"),
                 },
             ).expect("Could not get the UserCache directory")
@@ -187,7 +187,7 @@ fn holochain_dir() -> PathBuf {
         #[cfg(not(target_os = "android"))]
         {
             let tmp_dir =
-                tempdir::TempDir::new("summon-shopper-app").expect("Could not create temporary directory");
+                tempdir::TempDir::new("summon-shopper").expect("Could not create temporary directory");
 
             // Convert `tmp_dir` into a `Path`, destroying the `TempDir`
             // without deleting the directory.
@@ -198,7 +198,7 @@ fn holochain_dir() -> PathBuf {
         app_dirs2::app_root(
             app_dirs2::AppDataType::UserData,
             &app_dirs2::AppInfo {
-                name: "summon-shopper-app",
+                name: "summon-shopper",
                 author: std::env!("CARGO_PKG_AUTHORS"),
             },
         )

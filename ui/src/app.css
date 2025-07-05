@@ -1,0 +1,251 @@
+:root {
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --primary: #ff7300;
+  --primary-dark: #E03C00;
+  --secondary: #E91E63;
+  --text-primary: #1A1A1A;
+  --text-secondary: #5A5A5A;
+  --background: #FFFFFF;
+  --surface: #F8F8F8;
+  --surface-hover: #F0F0F0;
+  --border: #E0E0E0;
+  --border-lighter: #F0F0F0;
+  --success: #00C851;
+  --warning: #FFBB33;
+  --error: #FF4444;
+  --button-text: #FFFFFF;
+  /* Horizontal padding for all content containers */
+  --content-padding-x: 16px;
+  /* Spacing between major sections */
+  --section-spacing: 20px;
+
+  --scrollbar-track: var(--background);
+  --scrollbar-thumb: var(--primary);
+  --scrollbar-thumb-hover: var(--border-lighter);
+
+
+  /* Overlay backgrounds */
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  --overlay-light: rgba(255, 255, 255, 0.95);
+  --overlay-button: rgba(255, 255, 255, 0.8);
+
+  /* Typography */
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing scale */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  --spacing-xxxl: 30px;
+
+  /* Layout dimensions */
+  --sidebar-width: 320px;
+  --sidebar-width-category: 260px;
+  /* This is for the main app header */
+  --component-header-height: 72px;
+  /* NEW: For slide-out panel headers */
+  --subheader-height: 10px;
+  --content-margin: 15px;
+
+  /* Shadows */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-sidebar: 2px 0 15px rgba(0, 0, 0, 0.12);
+  --shadow-button: 0 4px 5px rgba(0, 0, 0, 0.2);
+
+  /* Z-index system */
+  --z-index-sticky: 10;
+  --z-index-modal: 1000;
+  --z-index-overlay: 2000;
+  --z-index-highest: 9999;
+
+  /* Borders */
+  --border-width: 2px;
+  --border-width-thin: 1px;
+
+  /* Component sizes */
+  --btn-icon-size: 50px;
+  --btn-icon-size-sm: 35px;
+  --avatar-size: 75px;
+
+  --btn-height-sm: 35px;
+  --btn-height-md: 50px;
+  --btn-height-lg: 50px;
+
+  --btn-padding-sm: var(--spacing-xs) var(--spacing-sm);
+  --btn-padding-md: var(--spacing-sm) var(--spacing-md);
+  --btn-padding-lg: var(--spacing-md) var(--spacing-lg);
+
+  --btn-font-size-sm: 14px;
+  --btn-font-size-md: 16px;
+  --btn-font-size-lg: 17px;
+
+  /* Transforms */
+  --hover-scale: 1.1;
+  --hover-scale-button: 1.25;
+  --hover-scale-subtle: 1.05;
+  --hover-lift: -2px;
+
+  /* Border radius */
+  --card-border-radius: 12px;
+  --btn-border-radius: 50px;
+  --btn-border-radius-round: 20px;
+
+  /* Transitions */
+  --card-transition: transform 0.3s ease, opacity 0.3s ease;
+  --card-border: 1px solid var(--border);
+  --btn-transition: all 0.25s ease;
+  --btn-transition-fast: all 0.2s ease;
+  --btn-primary-color: var(--primary);
+  --btn-primary-hover: var(--primary-dark);
+
+  /* Animation */
+  --fade-in-duration: 0.3s;
+  --card-slide-distance: 20px;
+  --transition-fast: 200ms;
+  --transition-normal: 300ms;
+  --transition-smooth: 500ms;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+}
+
+#app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  font-family: inherit;
+}
+
+/* ===== Button System ===== */
+/* Button Base - shared properties for all buttons */
+.btn {
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  transition: var(--btn-transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: none;
+  outline: none;
+}
+
+/* Primary Button - gradient background */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: var(--button-text);
+  border: none;
+  border-radius: var(--btn-border-radius);
+  box-shadow: var(--shadow-button);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+  box-shadow: var(--shadow-medium);
+  transform: translateY(var(--hover-lift));
+}
+
+/* Secondary Button - bordered style */
+.btn-secondary {
+  background: var(--background);
+  color: var(--text-primary);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: var(--btn-border-radius);
+  box-shadow: var(--shadow-subtle);
+}
+
+.btn-secondary:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  transform: translateY(var(--hover-lift));
+  box-shadow: var(--shadow-medium);
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn var(--transition-normal) ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut var(--transition-normal) ease forwards;
+}
+
+.scale-in {
+  animation: scaleIn var(--transition-normal) ease forwards;
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+svg.lucide {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

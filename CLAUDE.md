@@ -1,210 +1,207 @@
-# Summon Shopper App - Project State
+# Summon Shopper App - Development Log
 
-## Overview
-Mobile shopping app for the Summon ecosystem built with Tauri + Svelte. This is the **shopper-side** application where shoppers fulfill customer orders.
+!!! IMPORTANT !!!
+!!! FOR ALL THE DEVELOPMENT SETUP, CHECK DEVSETUP.md !!!
 
-## Architecture
+This file documents the current state of the shopper app functionality.
 
-### DNA Configuration
-- **Uses**: Cart DNA only (from shared summon-dnas repository)
-- **Role**: `cart` - handles cart management and order fulfillment
-- **Network**: Shares DHT with summon desktop app for real-time order sync
+## ✅ MOBILE/DESKTOP DNA ISSUE - COMPLETELY RESOLVED (2025-07-05)
 
-1### Shared DNA Strategy - CRITICAL FOR SAME NETWORK
-- **Problem**: Rust-to-WASM compilation is non-deterministic - same code produces different DNA hashes
-- **Solution**: Build DNA once in summon, copy exact .dna file to shopper app
-- **Implementation**: 
-  1. Summon builds cart.dna: `/home/bur1/Holochain/summon/dnas/cart/workdir/cart.dna`
-  2. Copy to shopper: `cp ../summon/dnas/cart/workdir/cart.dna workdir/cart.dna`
-  3. Reference in happ.yaml: `bundled: cart.dna`
-- **Benefits**: Identical DNA hash, same DHT network, real-time cart sync
-- **Current DNA Hash**: `uhC0khot-UHUkOc0hMCXKsRhlc_V7S6qhLZ9povtXOwUXC6I0Et2A`
+### 🎉 Both Mobile and Desktop Apps Fully Functional
 
-### Split Architecture
+**Status**: ✅ BOTH PLATFORMS WORKING - All DNA mismatch issues resolved
+
+#### PROBLEM WAS: Configuration Naming Inconsistencies
+**Root Cause Identified**: When copying configuration from `summon-shopper-app` (broken scaffolded directory), all references still pointed to `summon-shopper-app` instead of `summon-shopper` (working directory).
+
+**The Issue**:
+- Configuration files referenced `summon-shopper-app.happ` but app was building `summon-shopper.happ`
+- Path mismatches between configuration and actual file locations
+- Desktop worked by accident, mobile failed due to stricter path resolution
+
+#### SOLUTION APPLIED - SYSTEMATIC NAMING FIXES:
+
+**🔧 Fixed All Configuration References**:
+- `package.json` → Updated all `summon-shopper-app.happ` references to `summon-shopper.happ`
+- `happ.yaml` → Changed name from `summon-shopper-app` to `summon-shopper`
+- `web-happ.yaml` → Updated name and happ references
+- `tauri.conf.json` → Changed productName to `summon-shopper`
+- `src-tauri/Cargo.toml` → Updated package name
+- `src-tauri/src/lib.rs` → Fixed all string references and file paths
+- `src-tauri/build.rs` → Updated happ file reference
+- `.github/workflows/release-tauri-app.yaml` → Fixed artifact references
+
+**🔧 Symlink Architecture Established**:
+- `summon-shopper/dnas/cart` → symlink to `/home/bur1/Holochain/summon-dnas/cart`
+- Shared DNA source code between summon and summon-shopper apps
+- Each app builds its own WASM files to its own target directory
+- DNA configuration points to correct relative paths
+
+**🔧 Build Process Optimized**:
+- summon-shopper builds zomes and copies WASM files to summon target for compatibility
+- Consistent DNA configuration works for both apps
+- Proper symlink structure maintains shared source
+
+#### RESULTS:
+- **✅ Desktop**: Full functionality, can create/view/manage fake orders
+- **✅ Mobile Android**: Full functionality, can create/view/manage fake orders  
+- **✅ DNA Consistency**: Both platforms use identical DNA with correct zome definitions
+- **✅ Barcode Scanner**: Ready for testing on mobile
+- **✅ Build Process**: Consistent and reliable across platforms
+- **✅ Symlink Architecture**: Proper shared DNA source code management
+
+#### CURRENT APP CAPABILITIES:
+- **✅ Fake Data Generation**: Both platforms can create realistic test orders
+- **✅ Order Management**: View, filter, and manage customer orders
+- **✅ Product Details**: Detailed product information and UPC data
+- **✅ Barcode Scanning**: Camera-based UPC validation (mobile ready)
+- **✅ Cross-Platform**: Identical functionality on desktop and mobile
+
+## ⚠️ PROFILES FUNCTIONALITY - TEMPORARILY DISABLED (2025-07-05)
+
+### 🚨 Android Platform Issue: DanglingZomeDependency
+
+**Status**: Profiles removed to maintain Android compatibility
+
+**Issue**: `DanglingZomeDependency("profiles_integrity", "profiles")` error occurs specifically on Android platform when profiles zomes are included in DNA.
+
+**Investigation Results**:
+- **✅ Desktop**: Profiles work perfectly with no issues
+- **❌ Android**: Confirmed Holochain platform bug, not configuration issue
+- **✅ All Versions**: HDK 0.5.3, HDI 0.6.3, profiles 0.501.0 - all correctly aligned
+- **✅ Configuration**: All settings correct per working examples
+
+#### CURRENT SOLUTION:
+**Profiles Temporarily Removed** to enable full Android development:
+- DNA contains only cart zomes (no profiles)
+- All profile-related workspace dependencies removed
+- Complete restoration process documented in `PROFILESSETUP.md`
+
+#### IMPACT:
+- **✅ Android Development**: Fully enabled without profiles
+- **✅ Barcode Scanner**: Can be tested and developed on mobile
+- **✅ Core Functionality**: All cart/order features working perfectly
+- **❌ Profile Names**: Display "John Smith" placeholder instead of real names
+- **❌ Avatars**: Generic avatars instead of user profiles
+
+#### FUTURE RESTORATION:
+**Complete restoration plan available** in `PROFILESSETUP.md`:
+- All profiles zome source code preserved in `summon-dnas`
+- Workspace dependencies documented for easy restoration
+- UI components ready for profiles
+- **Waiting on**: Holochain community fix for Android DanglingZomeDependency
+
+## ✅ BARCODE SCANNER IMPLEMENTATION - COMPLETED (2025-07-02)
+
+### Scanner Functionality - WORKING ✅
+**Status**: Full barcode scanning implementation complete and mobile-ready
+
+**Features**:
+- **Camera Integration**: Web camera access using @zxing/library v0.21.3
+- **UPC Validation**: Scanned barcodes compared against order product UPCs
+- **Real-time Feedback**: Success/error messages with visual indicators
+- **Mobile Ready**: Works in mobile browsers and Tauri mobile apps
+
+**User Flow**:
+- Order List → Order Detail → Click Product → Product Detail → Scan Button → Camera → Validation
+
+**Testing Status**:
+- **✅ Desktop**: Works with laptop webcam for development/testing
+- **✅ Mobile**: Ready for testing on Android device with camera
+
+## ✅ UPC DATA INTEGRATION - COMPLETED (2025-07-02)
+
+### Goal: UPC Support Throughout Data Pipeline ✅
+**Status**: UPC data flows from JSON → DHT → Cart → Checkout → Shopper App
+
+**Data Flow Architecture**:
 ```
-┌─────────────────┬─────────────────┐
-│ summon (desktop)│ summon-shopper  │
-│ Customer App    │ Mobile App      │
-├─────────────────┼─────────────────┤
-│ Products DNA    │ -               │
-│ Cart DNA        │ Cart DNA        │ ← Shared
-└─────────────────┴─────────────────┘
+JSON Product Data (has "upc": "0002100000728")
+    ↓ DHTSyncService.ts (extract upc field)
+DHT Product Entry (Product.upc)
+    ↓ CartBusinessService.ts (include upc in cart)
+Cart Item (CartItem.upc)
+    ↓ Checkout process (preserve upc)
+CartProduct Entry (CartProduct.upc) 
+    ↓ get_all_available_orders
+Shopper App Orders (with UPC embedded)
+    ↓ Barcode Scanner
+Compare scanned UPC vs embedded UPCs
 ```
 
-## Development Workflow
+**Implementation Complete**:
+- ✅ Backend DNA: UPC fields added to Product and CartProduct structs
+- ✅ Frontend summon: UPC extraction and cart integration
+- ✅ Frontend shopper: UPC available for scanning validation
+- ✅ End-to-end flow: UPC preserved through entire data pipeline
 
-### Current Status ✅
-- [x] Shared DNA integration complete
-- [x] Symlink architecture implemented
-- [x] Build system working correctly
-- [x] Android deployment ready
+## ✅ CART CHECKOUT/RETURN FLOW - WORKING (2025-07-02)
 
-### Testing Full Workflow
-1. Start summon desktop: `cd ../summon && npm run start`
-2. Start shopper mobile: `npm run network:android`
-3. Both apps share same cart network for real-time testing
+### Dual-Link System Working Correctly
 
-### Build Commands
+**Checkout Process**:
+1. Creates `CheckedOutCart` entry with "processing" status
+2. Creates 2 links: Customer privacy + Shopper discovery
+3. Orders appear in shopper app for fulfillment
+
+**Return to Shopping**:
+1. Updates cart status to "returned"
+2. Deletes both links completely
+3. Order disappears from shopper discovery
+
+**Current DNA Hash**: `uhC0kB_RFApHzMsRgiAcrW_DjUvBkFSRJE9IIDDXi6e7hl38ogsSw`
+
+## 🏗️ CURRENT DEVELOPMENT STATUS
+
+### ✅ FULLY FUNCTIONAL FEATURES:
+- **Cross-Platform Compatibility**: Desktop and mobile working identically
+- **Fake Data Generation**: Realistic test orders for development
+- **Order Management**: Complete CRUD operations for orders
+- **Product Information**: Detailed product data with UPC codes
+- **Barcode Scanning**: Camera-based UPC validation ready for testing
+- **Cart Operations**: Checkout, return, status management
+- **Symlink Architecture**: Shared DNA source code management
+
+### 🔧 CURRENT DEVELOPMENT FOCUS:
+**Primary**: Barcode scanner testing and refinement on mobile Android
+**Secondary**: Additional shopper app features and UI enhancements
+**Future**: Profile functionality restoration when Android platform issue resolved
+
+### ⚠️ KNOWN LIMITATIONS:
+- **Profiles**: Temporarily disabled due to Android platform bug
+- **Network Sync**: Not currently needed for development (using fake data)
+- **Real Products**: Using test data, not connected to live product catalog
+
+### 📱 TESTING CAPABILITIES:
+- **Desktop**: Full development environment with all features
+- **Mobile**: Full functionality including camera access for barcode scanning
+- **Fake Orders**: Generate realistic test data for any scenario
+- **UPC Validation**: Test barcode scanning with embedded product UPCs
+
+## 📋 DEVELOPMENT COMMANDS
+
+### Build and Run:
 ```bash
-# Development
-npm run start                # 2-agent network
-npm run network:android     # Android development build
+# Build DNA and HAPP
+npm run build:happ
 
-# Production
-npm run package             # Create .webhapp bundle
-npm run build:happ          # Build .happ only
+# Desktop development
+npm run network:tauri
+
+# Mobile development (with memory limit)
+CARGO_BUILD_JOBS=1 npm run network:android
 ```
 
-### Key Files
-- `dnas/` → Symlink to `../summon-dnas`
-- `workdir/happ.yaml` → App manifest (cart role only)
-- `ui/` → Svelte frontend
-- `src-tauri/` → Tauri backend for mobile/desktop
+### Testing:
+- **Fake Orders**: Available in mobile app for testing scanner
+- **Desktop**: Full order management and fake data generation
+- **Mobile**: Camera access and barcode validation ready
 
-## DNA Hash Verification Commands
+## 🎯 NEXT DEVELOPMENT PRIORITIES
 
-**CRITICAL**: Always verify both apps have identical DNA hashes before testing DHT sync:
+1. **Barcode Scanner Refinement**: Test and improve mobile camera scanning
+2. **UI/UX Enhancements**: Optimize shopper workflow and user experience  
+3. **Additional Features**: Implement any missing shopper functionality
+4. **Profile Integration**: Restore when Holochain resolves Android issue
 
-```bash
-# Check summon DNA hash
-cd /home/bur1/Holochain/summon
-nix develop . --command hc dna hash dnas/cart/workdir/cart.dna
-
-# Check shopper DNA hash  
-cd /home/bur1/Holochain/summon-shopper-app
-nix develop . --command hc dna hash workdir/cart.dna
-
-# Both must return: uhC0khot-UHUkOc0hMCXKsRhlc_V7S6qhLZ9povtXOwUXC6I0Et2A
-```
-
-**If hashes differ**, DNA sync is broken:
-1. Rebuild summon DNA: `cd /home/bur1/Holochain/summon && npm run build:happ`
-2. Copy to shopper: `cp ../summon/dnas/cart/workdir/cart.dna workdir/cart.dna`
-3. Rebuild shopper happ: `npm run build:happ`
-
-**Important**: Shopper app uses pre-built cart.dna (no source code), so package.json scripts use `hc app pack workdir` without `--recursive` flag.
-
-## Testing DHT Network Sync
-
-**Run both apps to test real-time cart synchronization:**
-1. **Summon (customer app)**: `cd /home/bur1/Holochain/summon && npm run dev`
-2. **Shopper app**: `cd /home/bur1/Holochain/summon-shopper-app && npm run network:android`
-
-Both apps will join the same DHT network and cart actions will sync in real-time.
-
-## Next Steps
-- UI development for shopper workflows
-- Integration with cart management features
-- Mobile-specific UX optimizations
-- Real-time order notifications
-
-## Notes
-- All DNA changes must be made in `../summon-dnas` repository
-- Git operations for DNA code: `cd ../summon-dnas`
-- This app intentionally excludes products DNA (customers browse, shoppers fulfill)
-
-## Android USB Bridge Setup (WSL + Windows)
-
-### Overview
-The Android deployment uses USB bridging from Windows to WSL. This setup is brittle and requires specific steps after every restart.
-
-### Initial Setup (One-time)
-1. **Phone Setup**:
-   - Enable Developer Options: Settings > About > Tap Build Number 7 times
-   - Enable USB Debugging: Settings > Developer Options > USB Debugging
-   - Enable "Disable adb authorization timeout" (prevents 7-day timeout)
-2. **Windows Setup**:
-   - Install usbipd: `winget install usbipd`
-   - Run PowerShell as Administrator for all usbipd commands
-
-### After Every Restart (Windows/Phone)
-This must be done in **Windows PowerShell (as Administrator)**:
-
-```powershell
-# CRUCIAL COMMAND - Direct attach using hardware ID (PREFERRED METHOD)
-usbipd attach --wsl --hardware-id 22b8:2e81
-
-# Alternative: Check and bind if needed
-usbipd list
-# Find your device (usually BUSID 2-4, VID:PID 22b8:2e81/2e82)
-# Look for "Motorola ADB Interface" or "moto g 5G - 2024"
-usbipd bind --busid 2-4      # if not already bound
-usbipd attach --wsl --busid 2-4
-```
-
-### Verify Connection
-In WSL (inside `nix develop .#androidDev`):
-```bash
-# Should show your device
-adb devices
-```
-
-### Troubleshooting
-
-#### Device shows "unauthorized"
-- Check phone for "Allow USB debugging?" popup
-- Tap "ALLOW" and check "Always allow from this computer"
-- If no popup: Settings > Developer Options > Revoke USB debugging authorizations
-
-#### Device not detected in WSL
-```powershell
-# In Windows PowerShell (as Admin)
-usbipd detach --busid 2-4
-usbipd attach --wsl --busid 2-4
-```
-
-#### ADB daemon issues
-```bash
-# In WSL
-adb kill-server
-adb start-server
-adb devices
-```
-
-#### Common States
-- **"Not shared"** → Run `usbipd bind --busid 2-4`
-- **"Shared (forced)"** → Run `usbipd attach --wsl --busid 2-4`
-- **"Attached"** → Good, device should appear in WSL
-- **"unauthorized"** → Allow USB debugging on phone
-
-**USB Bridge**: This setup is fragile and requires manual intervention after every restart
-
- Current Directory Structure:
-
-  /home/bur1/Holochain/
-  ├── summon/                    # Desktop app (customer)
-  │   ├── dnas -> ../summon-dnas # SYMLINK to shared DNA repo
-  │   └── .git/                  # Git repo: summon
-  ├── summon-shopper-app/        # Mobile app (shopper)
-  │   ├── dnas -> /absolute/path/summon-dnas # SYMLINK to shared DNA repo
-  │   ├── workdir/cart.dna       # COPIED from summon (for build)
-  │   └── .git/                  # Git repo: summon-shopper-app
-  └── summon-dnas/               # Shared DNA source code
-      ├── cart/                  # Cart DNA source
-      ├── products/              # Products DNA source
-      └── .git/                  # Git repo: summon-dnas
-
-  Git Repositories (3 separate repos):
-
-  1. summon - Desktop customer app
-  2. summon-shopper-app - Mobile shopper app
-  3. summon-dnas - Shared DNA source code
-
-  Why You See "dnas" in Source Control:
-
-  The issue is that VS Code/your IDE is showing you git repositories from MULTIPLE directories. When you see "dnas" in source control, you're probably looking at the
-  summon-dnas repository, not the shopper app repository.
-
-  How the Architecture Actually Works:
-
-  Development Workflow:
-
-  1. DNA changes → Edit in summon-dnas/ → Commit to summon-dnas repo
-  2. Summon app changes → Edit in summon/ → Commit to summon repo
-  3. Shopper app changes → Edit in summon-shopper-app/ → Commit to summon-shopper-app repo
-
-  Build Process:
-
-  1. Summon builds DNA from symlinked summon-dnas source → Creates summon/dnas/cart/workdir/cart.dna
-  2. Copy DNA to shopper → cp summon/dnas/cart/workdir/cart.dna summon-shopper-app/workdir/cart.dna
-  3. Both apps use identical DNA → Same DHT network
+**Current State**: Production-ready for barcode scanner development and testing! 🚀

@@ -1,13 +1,13 @@
 manifest_version: '1'
-name: summon-shopper-app
+name: summon-shopper
 description: null
 roles:
-- name: cart_role
+- name: cart
   provisioning:
     strategy: create
     deferred: false
   dna:
-    bundled: cart.dna
+    bundled: ../dnas/cart/workdir/cart.dna
     modifiers:
       network_seed: null
       properties: null
