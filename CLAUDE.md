@@ -205,3 +205,5 @@ CARGO_BUILD_JOBS=1 npm run network:android
 4. **Profile Integration**: Restore when Holochain resolves Android issue
 
 **Current State**: Production-ready for barcode scanner development and testing! 🚀
+
+npm run android-only

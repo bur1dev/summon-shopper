@@ -2,44 +2,63 @@
   import { createEventDispatcher } from 'svelte';
   import { scan, Format, checkPermissions, requestPermissions } from '@tauri-apps/plugin-barcode-scanner';
 
-  export let isActive = false;
-  export let targetUPCs: string[] = []; // UPCs from current order to match against
+  export let isActive: boolean = false;
+  export let targetUPCs: string[] = [];
 
-  const dispatch = createEventDispatcher();
-  let scanning = false;
-  let error = '';
+  const dispatch = createEventDispatcher<{
+    'scan-success': { upc: string; message: string };
+    'scan-error': { upc: string; message: string };
+    'close': void;
+  }>();
 
-  async function startScanning() {
-    if (scanning) return;
+  let scanning: boolean = false;
+  let error: string = '';
+  let hasStarted: boolean = false;
+
+  async function startScanning(): Promise<void> {
+    if (scanning || hasStarted) return;
+    hasStarted = true;
     
     try {
       error = '';
       scanning = true;
       console.log('[TAURI SCANNER] Starting camera access...');
       
-      // Check permissions first
-      const permissionStatus = await checkPermissions();
-      console.log('[TAURI SCANNER] Permission status:', permissionStatus);
+      if (typeof scan !== 'function') {
+        error = 'Barcode scanner not available on this platform.';
+        scanning = false;
+        console.log('[TAURI SCANNER] ERROR: Scan function not available');
+        return;
+      }
       
-      if (permissionStatus === 'denied') {
-        // Request permissions
-        const requestResult = await requestPermissions();
-        console.log('[TAURI SCANNER] Permission request result:', requestResult);
+      // Check permissions first
+      console.log('[TAURI SCANNER] Checking permissions...');
+      try {
+        const permissionStatus = await checkPermissions();
+        console.log('[TAURI SCANNER] Permission status:', permissionStatus);
         
-        if (requestResult === 'denied') {
-          error = 'Camera permission denied. Please allow camera access in your device settings.';
-          scanning = false;
-          return;
+        if (permissionStatus === 'denied' || permissionStatus === 'prompt') {
+          console.log('[TAURI SCANNER] Requesting permissions...');
+          const requestResult = await requestPermissions();
+          console.log('[TAURI SCANNER] Permission request result:', requestResult);
+          
+          if (requestResult === 'denied') {
+            error = 'Camera permission denied. Please allow camera access in your device settings.';
+            scanning = false;
+            return;
+          }
         }
+      } catch (permError: unknown) {
+        console.log('[TAURI SCANNER] Permission error:', permError);
       }
       
       // Start scanning with UPC formats
-      console.log('[TAURI SCANNER] Starting scan with UPC formats...');
+      console.log('[TAURI SCANNER] Starting scan...');
       const result = await scan({ 
         formats: [Format.UPC_A, Format.UPC_E, Format.EAN13, Format.EAN8] 
       });
       
-      console.log('[TAURI SCANNER] Scan result:', result);
+      console.log('[TAURI SCANNER] Scan completed. Result:', result);
       
       if (result && result.content) {
         const scannedCode = result.content;
@@ -49,26 +68,28 @@
         error = 'No barcode detected. Please try again.';
       }
       
-    } catch (e) {
-      console.error('[TAURI SCANNER] Failed to scan:', e);
+    } catch (e: unknown) {
+      console.error('[TAURI SCANNER] Error details:', e);
       
       if (e instanceof Error) {
         if (e.message.includes('permission')) {
           error = 'Camera permission denied. Please allow camera access in your device settings.';
         } else if (e.message.includes('cancel')) {
           error = ''; // User cancelled, not an error
+        } else if (e.message.includes('not implemented')) {
+          error = 'Barcode scanner not available on this platform.';
         } else {
-          error = e.message || 'Failed to scan barcode';
+          error = `Scanner error: ${e.message}`;
         }
       } else {
-        error = 'Failed to scan barcode';
+        error = 'Unexpected error occurred';
       }
     } finally {
       scanning = false;
     }
   }
 
-  function handleScanResult(scannedCode: string) {
+  function handleScanResult(scannedCode: string): void {
     console.log(`[TAURI SCANNER] Processing scanned UPC: ${scannedCode}`);
     console.log(`[TAURI SCANNER] Target UPCs (${targetUPCs.length}):`, targetUPCs);
     
@@ -82,7 +103,7 @@
     }
     
     // Check if scanned UPC matches the target UPC
-    const matchingProduct = targetUPCs.find(upc => upc === scannedCode);
+    const matchingProduct = targetUPCs.find((upc: string) => upc === scannedCode);
     
     if (matchingProduct) {
       console.log(`[TAURI SCANNER] ✅ MATCH FOUND! UPC ${scannedCode} matches target`);
@@ -99,13 +120,14 @@
     }
   }
 
-  function closeScanner() {
+  function closeScanner(): void {
     scanning = false;
+    hasStarted = false;
     dispatch('close');
   }
 
   // Auto-start when isActive changes
-  $: if (isActive && !scanning) {
+  $: if (isActive && !scanning && !error && !hasStarted) {
     startScanning();
   }
 </script>

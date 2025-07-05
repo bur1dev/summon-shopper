@@ -46,8 +46,8 @@ To package the web happ:
 npm run package
 ```
 
-You'll have the `summon-shopper-app.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
-You will also have its subcomponent `summon-shopper-app.happ` in the same folder`.
+You'll have the `summon-shopper.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
+You will also have its subcomponent `summon-shopper.happ` in the same folder`.
 
 ## Documentation
 

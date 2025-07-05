@@ -1,0 +1,110 @@
+07-04 21:09:36.982 I/Tauri/Console( 2441): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 369 - Msg: [TAURI SCANNER] Starting camera access...
+07-04 21:14:51.790 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:14:51.791 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:14:51.813 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:14:51.814 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:14:51.876 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:14:51.876 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:14:51.876 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:14:51.877 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:14:55.779 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:14:55.780 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:14:55.789 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:14:55.789 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:14:55.792 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:14:55.792 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:14:55.792 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:14:55.793 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:14:57.168 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:14:57.168 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:14:57.174 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:14:57.174 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:14:57.180 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:14:57.180 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:14:57.180 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:14:57.181 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:14:58.354 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:14:58.354 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:14:58.363 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:14:58.363 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:14:58.373 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:14:58.373 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:14:58.374 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:14:58.374 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:14:59.524 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:14:59.525 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:14:59.531 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:14:59.531 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:14:59.537 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:14:59.537 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:14:59.538 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:14:59.538 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:00.746 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:00.746 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:00.749 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:00.751 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:00.756 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:00.757 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:00.757 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:00.757 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:02.026 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:02.027 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:02.035 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:02.035 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:02.038 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:02.039 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:02.039 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:02.040 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:02.729 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:02.730 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:02.735 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:02.735 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:02.738 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:02.739 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:02.740 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:02.740 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:04.135 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:04.136 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:04.143 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:04.144 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:04.149 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:04.150 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:04.150 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:04.150 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:05.157 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:05.158 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:05.179 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:05.179 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:05.197 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:05.198 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:05.208 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:05.208 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:06.106 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:06.107 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:06.114 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:06.115 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:06.130 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:06.130 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:06.130 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:06.131 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:06.854 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:06.854 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:06.880 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:06.881 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:06.892 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:06.893 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:06.895 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:06.895 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:07.471 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:07.471 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:07.473 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:07.473 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:07.494 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details: [object Object]
+07-04 21:15:07.496 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 421 - Msg: [TAURI SCANNER] Error type: object
+07-04 21:15:07.496 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 422 - Msg: [TAURI SCANNER] Error message: No permission to use camera. Did you request it yet?
+07-04 21:15:07.497 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 423 - Msg: [TAURI SCANNER] Error stack: undefined
+07-04 21:15:08.040 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 387 - Msg: [TAURI SCANNER] Scan function available
+07-04 21:15:08.040 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 388 - Msg: [TAURI SCANNER] Checking permissions...
+07-04 21:15:08.047 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 390 - Msg: [TAURI SCANNER] Permission status: prompt
+07-04 21:15:08.047 I/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 404 - Msg: [TAURI SCANNER] Starting scan with formats: UPC_A,UPC_E,EAN_13,EAN_8
+07-04 21:15:08.052 E/Tauri/Console( 9331): File: http://tauri.localhost/src/cart/components/TauriBarcodeScanner.svelte - Line 420 - Msg: [TAURI SCANNER] Error details
