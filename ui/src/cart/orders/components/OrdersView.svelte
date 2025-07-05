@@ -333,7 +333,6 @@
     padding: var(--spacing-lg);
     background-color: var(--surface);
     min-height: 0; /* Allows flex child to shrink */
-    height: 0; /* Force height calculation from flex */
   }
 
   .empty-state {
@@ -375,11 +374,20 @@
 
   .carts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: var(--spacing-xl);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+    gap: var(--spacing-lg);
     padding-bottom: var(--spacing-xl);
     max-width: 1400px;
     margin: 0 auto;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .carts-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+      padding-bottom: var(--spacing-lg);
+    }
   }
 
   .loading {

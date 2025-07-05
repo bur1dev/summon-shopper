@@ -301,4 +301,38 @@
     color: var(--text-primary);
     font-weight: var(--font-weight-semibold);
   }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .cart-header {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .customer-section {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      margin-left: 0;
+      gap: var(--spacing-sm);
+    }
+    
+    .customer-avatar-small {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .customer-name {
+      text-align: left;
+    }
+    
+    .cart-pricing {
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .delivery-details {
+      padding: var(--spacing-sm);
+    }
+  }
 </style>
