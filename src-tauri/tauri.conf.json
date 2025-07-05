@@ -10,7 +10,8 @@
   "app": {
     "withGlobalTauri": false,
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": ["main-capability", "mobile-capability"]
     },
     "windows": []
   },

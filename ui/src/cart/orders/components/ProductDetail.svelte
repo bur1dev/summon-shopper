@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowLeft, Camera, Package, CheckCircle } from "lucide-svelte";
-  import BarcodeScanner from "../../components/BarcodeScanner.svelte";
+  import TauriBarcodeScanner from "../../components/TauriBarcodeScanner.svelte";
 
   // Props
   export let product: any;
@@ -144,7 +144,7 @@
 </div>
 
 <!-- Barcode Scanner Component -->
-<BarcodeScanner 
+<TauriBarcodeScanner 
   isActive={scannerActive}
   targetUPCs={targetUPCs}
   on:scan-success={handleScanSuccess}
