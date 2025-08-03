@@ -3,214 +3,204 @@
 ## Overview
 This document contains the exact steps to restore profiles functionality that was temporarily removed to fix Android DanglingZomeDependency issues.
 
+**IMPORTANT**: Profiles are now implemented as a **separate DNA** (not embedded in cart DNA), matching the summon-customer architecture. This document reflects the current separate DNA approach.
+
 ## What Was Removed
-The following profiles components were removed to create a profiles-free DNA for Android testing:
+The following profiles components were removed to create a profiles-free architecture for Android testing:
 
-### 1. DNA Manifest Entries
-**File**: `/home/bur1/Holochain/summon-dnas/cart/workdir/dna.yaml`
+### 1. Profiles DNA Symlink
+**Removed symlink**: `/home/bur1/Holochain/summon-shopper/dnas/profiles/`
 
-**Removed from integrity zomes section** (around line 12):
-```yaml
-  - name: profiles_integrity
-    hash: null
-    bundled: '../../../summon/target/wasm32-unknown-unknown/release/profiles_integrity.wasm'
-    dependencies: null
-    dylib: null
-```
+**What this symlink points to**: `/home/bur1/Holochain/summon-customer/dnas/profiles/`
 
-**Removed from coordinator zomes section** (around line 25):
-```yaml
-  - name: profiles
-    hash: null
-    bundled: '../../../summon/target/wasm32-unknown-unknown/release/profiles.wasm'
-    dependencies:
-    - name: profiles_integrity
-    dylib: null
-```
+**Note**: Profiles is a separate DNA, NOT part of the cart DNA. The profiles DNA contains its own integrity and coordinator zomes.
 
 ### 2. Workspace Dependencies
 
-**File**: `/home/bur1/Holochain/summon/Cargo.toml`
-**Removed workspace dependencies** (around lines 19-23):
-```toml
-[workspace.dependencies.profiles]
-path = "dnas/cart/zomes/coordinator/profiles"
-
-[workspace.dependencies.profiles_integrity]
-path = "dnas/cart/zomes/integrity/profiles"
-```
-
 **File**: `/home/bur1/Holochain/summon-shopper/Cargo.toml`
-**CRITICAL - Removed to fix Android compilation errors** (lines 25-29):
+**CRITICAL - Removed to fix Android compilation errors**:
 ```toml
 [workspace.dependencies.profiles]
-path = "dnas/cart/zomes/coordinator/profiles"
+path = "dnas/profiles/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
-path = "dnas/cart/zomes/integrity/profiles"
+path = "dnas/profiles/zomes/integrity/profiles"
+
+[workspace.dependencies.address]
+path = "dnas/profiles/zomes/coordinator/address"
+
+[workspace.dependencies.address_integrity]
+path = "dnas/profiles/zomes/integrity/address"
 ```
 **NOTE**: These MUST be re-added to summon-shopper/Cargo.toml when restoring profiles!
 
-### 3. Profiles Zome Directories
-**Deleted directories**:
-- `/home/bur1/Holochain/summon-dnas/cart/zomes/coordinator/profiles/`
-- `/home/bur1/Holochain/summon-dnas/cart/zomes/integrity/profiles/`
+**Also removed workspace members pattern**:
+```toml
+members = [
+  "src-tauri",  
+  "dnas/*/zomes/coordinator/*",
+  "dnas/*/zomes/integrity/*"
+]
+```
+This wildcard pattern includes all DNAs (cart + profiles) automatically.
+
+### 3. hApp Manifest Role
+**File**: `/home/bur1/Holochain/summon-shopper/workdir/happ.yaml`
+
+**Removed profiles_role entry**:
+```yaml
+# Profiles DNA - persistent user data
+- name: profiles_role
+  provisioning:
+    strategy: create
+    deferred: false
+  dna:
+    bundled: ../dnas/profiles/workdir/profiles.dna
+    modifiers:
+      network_seed: null
+      properties: null
+    installed_hash: null
+    clone_limit: 0
+```
+
+### 4. Frontend Role Reference
+**File**: `/home/bur1/Holochain/summon-shopper/ui/src/App.svelte`
+
+**Changed ProfilesClient role reference from**:
+```javascript
+profilesStore = new ProfilesStore(new ProfilesClient(client, "profiles_role"), {
+```
+**Back to**:
+```javascript
+profilesStore = new ProfilesStore(new ProfilesClient(client, "cart"), {
+```
 
 ## Restoration Steps
 
-### Step 1: Recreate Profiles Zome Directories
+### Step 1: Create Profiles DNA Symlink
 
-**Create coordinator profiles directory:**
+**Create symlink to summon-customer profiles DNA:**
 ```bash
-mkdir -p /home/bur1/Holochain/summon-dnas/cart/zomes/coordinator/profiles/src
+ln -s /home/bur1/Holochain/summon-customer/dnas/profiles /home/bur1/Holochain/summon-shopper/dnas/profiles
 ```
 
-**Create integrity profiles directory:**
-```bash
-mkdir -p /home/bur1/Holochain/summon-dnas/cart/zomes/integrity/profiles/src
-```
+**This symlink provides access to**:
+- `/home/bur1/Holochain/summon-customer/dnas/profiles/zomes/coordinator/profiles/`
+- `/home/bur1/Holochain/summon-customer/dnas/profiles/zomes/coordinator/address/`  
+- `/home/bur1/Holochain/summon-customer/dnas/profiles/zomes/integrity/profiles/`
+- `/home/bur1/Holochain/summon-customer/dnas/profiles/zomes/integrity/address/`
+- `/home/bur1/Holochain/summon-customer/dnas/profiles/workdir/profiles.dna`
 
-### Step 2: Create Cargo.toml Files
-
-**File**: `/home/bur1/Holochain/summon-dnas/cart/zomes/coordinator/profiles/Cargo.toml`
-```toml
-[package]
-name = "profiles"
-version = "0.0.1"
-edition = "2021"
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-name = "profiles"
-
-[dependencies]
-hdk = { workspace = true }
-serde = { workspace = true }
-holochain_serialized_bytes = { workspace = true }
-profiles_integrity = { path = "../../integrity/profiles" }
-hc_zome_profiles_coordinator = { git = "https://github.com/holochain-open-dev/profiles", branch = "main-0.5" }
-```
-
-**File**: `/home/bur1/Holochain/summon-dnas/cart/zomes/integrity/profiles/Cargo.toml`
-```toml
-[package]
-name = "profiles_integrity"
-version = "0.0.1"
-edition = "2021"
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-name = "profiles_integrity"
-
-[dependencies]
-hc_zome_profiles_integrity = { git = "https://github.com/holochain-open-dev/profiles", branch = "main-0.5" }
-hdi = { workspace = true }
-serde = { workspace = true }
-holochain_serialized_bytes = { workspace = true }
-```
-
-### Step 3: Create lib.rs Files
-
-**File**: `/home/bur1/Holochain/summon-dnas/cart/zomes/coordinator/profiles/src/lib.rs`
-```rust
-extern crate hc_zome_profiles_coordinator;
-```
-
-**File**: `/home/bur1/Holochain/summon-dnas/cart/zomes/integrity/profiles/src/lib.rs`
-```rust
-extern crate hc_zome_profiles_integrity;
-```
-
-### Step 4: Restore Workspace Dependencies
-
-**File**: `/home/bur1/Holochain/summon/Cargo.toml`
-
-**Add back to workspace dependencies section** (after line 17):
-```toml
-[workspace.dependencies.profiles]
-path = "dnas/cart/zomes/coordinator/profiles"
-
-[workspace.dependencies.profiles_integrity]
-path = "dnas/cart/zomes/integrity/profiles"
-```
-
-### Step 5: Restore DNA Manifest
-
-**File**: `/home/bur1/Holochain/summon-dnas/cart/workdir/dna.yaml`
-
-**Add back to integrity zomes section** (after cart_integrity):
-```yaml
-  - name: profiles_integrity
-    hash: null
-    bundled: '../../../summon/target/wasm32-unknown-unknown/release/profiles_integrity.wasm'
-    dependencies: null
-    dylib: null
-```
-
-**Add back to coordinator zomes section** (after cart coordinator):
-```yaml
-  - name: profiles
-    hash: null
-    bundled: '../../../summon/target/wasm32-unknown-unknown/release/profiles.wasm'
-    dependencies:
-    - name: profiles_integrity
-    dylib: null
-```
-
-### Step 6: Restore Summon-Shopper Workspace Dependencies
+### Step 2: Restore Summon-Shopper Workspace Configuration
 
 **CRITICAL STEP - File**: `/home/bur1/Holochain/summon-shopper/Cargo.toml`
 
 **Add back the profiles workspace dependencies** (after cart dependencies):
 ```toml
 [workspace.dependencies.profiles]
-path = "dnas/cart/zomes/coordinator/profiles"
+path = "dnas/profiles/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
-path = "dnas/cart/zomes/integrity/profiles"
+path = "dnas/profiles/zomes/integrity/profiles"
+
+[workspace.dependencies.address]
+path = "dnas/profiles/zomes/coordinator/address"
+
+[workspace.dependencies.address_integrity]
+path = "dnas/profiles/zomes/integrity/address"
+```
+
+**Also restore wildcard workspace members**:
+```toml
+members = [
+  "src-tauri",  
+  "dnas/*/zomes/coordinator/*",
+  "dnas/*/zomes/integrity/*"
+]
 ```
 
 **Why this is needed**: These were removed to fix Android compilation errors when profiles were absent. They MUST be restored when profiles are re-added, otherwise Android will fail to compile.
 
-### Step 7: Rebuild and Test
+### Step 3: Add Profiles Role to hApp Manifest
 
-**Rebuild DNA with profiles:**
-```bash
-cd /home/bur1/Holochain/summon
-cargo clean
-npm run build:happ
+**File**: `/home/bur1/Holochain/summon-shopper/workdir/happ.yaml`
+
+**Add profiles_role** (after cart role):
+```yaml
+# Profiles DNA - persistent user data
+- name: profiles_role
+  provisioning:
+    strategy: create
+    deferred: false
+  dna:
+    bundled: ../dnas/profiles/workdir/profiles.dna
+    modifiers:
+      network_seed: null
+      properties: null
+    installed_hash: null
+    clone_limit: 0
 ```
 
-**Copy to shopper app:**
+### Step 4: Fix Frontend Role Reference
+
+**File**: `/home/bur1/Holochain/summon-shopper/ui/src/App.svelte`
+
+**Change ProfilesClient role reference** (around line 52):
+```javascript
+// FROM:
+profilesStore = new ProfilesStore(new ProfilesClient(client, "cart"), {
+
+// TO:
+profilesStore = new ProfilesStore(new ProfilesClient(client, "profiles_role"), {
+```
+
+### Step 5: Build and Test
+
+**Build profiles DNA:**
 ```bash
-cp dnas/cart/workdir/cart.dna /home/bur1/Holochain/summon-shopper/workdir/cart.dna
+cd /home/bur1/Holochain/summon-shopper
+hc dna pack dnas/profiles/workdir
+```
+
+**Rebuild happ with profiles included:**
+```bash
+hc app pack workdir --recursive
 ```
 
 **Test desktop (should work):**
 ```bash
-cd /home/bur1/Holochain/summon
 npm start
 ```
 
 **Test Android (may still have DanglingZomeDependency):**
 ```bash
-cd /home/bur1/Holochain/summon-shopper
 nix develop .#androidDev
 npm run network:android
 ```
 
 ## Verification
 
-**Check DNA hashes match:**
+**Check profiles DNA builds correctly:**
 ```bash
-# In summon:
-hc dna hash dnas/cart/workdir/cart.dna
-
-# In summon-shopper:
-hc dna hash workdir/cart.dna
+cd /home/bur1/Holochain/summon-shopper
+hc dna hash dnas/profiles/workdir/profiles.dna
 ```
 
-**Both should return identical hashes.**
+**Check cart DNA hashes match:**
+```bash
+# In summon-customer:
+hc dna hash dnas/cart/workdir/cart.dna
+
+# In summon-shopper (via symlink):
+hc dna hash dnas/cart/workdir/cart.dna
+```
+
+**Both cart DNAs should return identical hashes.**
+
+**Verify profiles work in UI:**
+- Profile creation screen should appear on first run
+- Avatar should display without "Zome not found" errors
+- Frontend should successfully connect to "profiles_role"
 
 ## UI Dependencies
 **Both apps already have correct UI profiles dependencies:**
@@ -218,11 +208,19 @@ hc dna hash workdir/cart.dna
 - All other @holochain-open-dev packages at compatible versions ✅
 
 ## Expected Results After Restoration
-- ✅ **Desktop**: Full profiles functionality restored
+- ✅ **Desktop**: Full profiles functionality restored with separate profiles DNA
 - ❌ **Android**: Likely still DanglingZomeDependency (needs Holochain community fix)
-- ✅ **Network sync**: Both desktop apps should communicate with profiles
+- ✅ **Network sync**: Both summon-customer and summon-shopper should communicate with shared profiles
+- ✅ **Separate DNA Architecture**: Profiles isolated from cart DNA for better modularity
+
+## Architecture Notes
+- **Profiles DNA**: Separate DNA shared between summon-customer and summon-shopper via symlink
+- **Cart DNA**: Separate DNA also shared via symlink to summon-dnas
+- **Modular Design**: Each DNA can be enabled/disabled independently
+- **Shared Source**: Both apps use identical DNA source code but build independently
 
 ## Notes
 - This restoration assumes the Holochain community provides a fix for the Android DanglingZomeDependency issue
 - If Android still fails, the issue is confirmed as a Holochain Android platform bug
-- Desktop development can continue normally with profiles functionality
+- Desktop development can continue normally with full profiles functionality
+- The separate DNA architecture provides better isolation and modularity than the previous embedded approach

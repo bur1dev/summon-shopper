@@ -49,7 +49,7 @@ function handleProfileCreated(event: CustomEvent) {
 // Reactive statements for profile state (Svelte 4 way)
 $: if (client && !profilesStore) {
   console.log("Initializing ProfilesStore...");
-  profilesStore = new ProfilesStore(new ProfilesClient(client, "cart"), {
+  profilesStore = new ProfilesStore(new ProfilesClient(client, "profiles_role"), {
     avatarMode: "avatar-optional",
     minNicknameLength: 2,
     additionalFields: [],

@@ -2,7 +2,7 @@
   description = "Flake for Holochain app development";
 
   inputs = {
-    tauri-plugin-holochain.url = "github:darksoil-studio/tauri-plugin-holochain/main-0.5";
+    tauri-plugin-holochain.url = "github:darksoil-studio/tauri-plugin-holochain/main";
     holonix.url = "github:holochain/holonix?ref=main-0.5";
 
     nixpkgs.follows = "holonix/nixpkgs";
