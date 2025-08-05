@@ -1,209 +1,137 @@
-# Summon Shopper App - Development Log
+# Summon Shopper App - Development Status
 
-!!! IMPORTANT !!!
-!!! FOR ALL THE DEVELOPMENT SETUP, CHECK DEVSETUP.md !!!
+## =� CRITICAL DEVELOPMENT STATUS (2025-08-03)
 
-This file documents the current state of the shopper app functionality.
+### Current State: MAJOR REFACTORING NEEDED
 
-## ✅ MOBILE/DESKTOP DNA ISSUE - COMPLETELY RESOLVED (2025-07-05)
+**L BROKEN**: Summon-shopper app is currently broken due to DNA architecture mismatch
 
-### 🎉 Both Mobile and Desktop Apps Fully Functional
+**Root Issue**: The customer app (summon-customer) has been completely refactored to use a new clone-based cart architecture, but the shopper app is still using the old cart structure and calling functions that no longer exist.
 
-**Status**: ✅ BOTH PLATFORMS WORKING - All DNA mismatch issues resolved
+### <� THE NEW ARCHITECTURE VISION
 
-#### PROBLEM WAS: Configuration Naming Inconsistencies
-**Root Cause Identified**: When copying configuration from `summon-shopper-app` (broken scaffolded directory), all references still pointed to `summon-shopper-app` instead of `summon-shopper` (working directory).
+#### Complete Shopper-Customer Discovery System (NOT YET IMPLEMENTED)
 
-**The Issue**:
-- Configuration files referenced `summon-shopper-app.happ` but app was building `summon-shopper.happ`
-- Path mismatches between configuration and actual file locations
-- Desktop worked by accident, mobile failed due to stricter path resolution
+**Two-DNA System Architecture**:
 
-#### SOLUTION APPLIED - SYSTEMATIC NAMING FIXES:
+1. **`order_finder.dna`** (Per-Shopper Discovery Networks) - NOT YET CREATED
+   - Each shopper creates their own private discovery network
+   - Customers join via invite links and post their cart network seeds
+   - Agent-specific anchors ensure perfect customer-to-customer privacy
 
-**🔧 Fixed All Configuration References**:
-- `package.json` → Updated all `summon-shopper-app.happ` references to `summon-shopper.happ`
-- `happ.yaml` → Changed name from `summon-shopper-app` to `summon-shopper`
-- `web-happ.yaml` → Updated name and happ references
-- `tauri.conf.json` → Changed productName to `summon-shopper`
-- `src-tauri/Cargo.toml` → Updated package name
-- `src-tauri/src/lib.rs` → Fixed all string references and file paths
-- `src-tauri/build.rs` → Updated happ file reference
-- `.github/workflows/release-tauri-app.yaml` → Fixed artifact references
+2. **`cart.dna`** (Per-Order Sessions) - EXISTS BUT NEEDS DISCOVERY INTEGRATION
+   - Each customer order creates a fresh cart.dna clone
+   - Shoppers join customer cart clones using discovered network seeds
+   - Real-time shopping coordination between one customer and one shopper
 
-**🔧 Symlink Architecture Established**:
-- `summon-shopper/dnas/cart` → symlink to `/home/bur1/Holochain/summon-dnas/cart`
-- Shared DNA source code between summon and summon-shopper apps
-- Each app builds its own WASM files to its own target directory
-- DNA configuration points to correct relative paths
+#### The Complete User Flow (FUTURE IMPLEMENTATION)
 
-**🔧 Build Process Optimized**:
-- summon-shopper builds zomes and copies WASM files to summon target for compatibility
-- Consistent DNA configuration works for both apps
-- Proper symlink structure maintains shared source
+**Phase 1: Shopper Setup**
+1. Bob (shopper) creates `order_finder.dna` clone: `"bob_smith_encinitas_finder_xyz"`
+2. Bob generates invite link/QR code for his discovery network
+3. Bob distributes this link: "Join Bob's grocery delivery network!"
 
-#### RESULTS:
-- **✅ Desktop**: Full functionality, can create/view/manage fake orders
-- **✅ Mobile Android**: Full functionality, can create/view/manage fake orders  
-- **✅ DNA Consistency**: Both platforms use identical DNA with correct zome definitions
-- **✅ Barcode Scanner**: Ready for testing on mobile
-- **✅ Build Process**: Consistent and reliable across platforms
-- **✅ Symlink Architecture**: Proper shared DNA source code management
+**Phase 2: Customer Onboarding**
+1. Alice sees Bob's invite, scans QR code in summon-customer app
+2. Alice's app joins Bob's `order_finder.dna` clone permanently
+3. Alice can now post orders to her private anchor in Bob's discovery network
 
-#### CURRENT APP CAPABILITIES:
-- **✅ Fake Data Generation**: Both platforms can create realistic test orders
-- **✅ Order Management**: View, filter, and manage customer orders
-- **✅ Product Details**: Detailed product information and UPC data
-- **✅ Barcode Scanning**: Camera-based UPC validation (mobile ready)
-- **✅ Cross-Platform**: Identical functionality on desktop and mobile
+**Phase 3: Order Discovery & Shopping**
+1. Alice creates private `cart.dna` clone: `"alice_cart_monday_groceries_abc123"`
+2. Alice fills cart, publishes cart network seed to Bob's `order_finder.dna`
+3. Bob's summon-shopper queries his `order_finder.dna` � discovers Alice's order
+4. Bob joins Alice's `cart.dna` clone using her network seed
+5. Bob shops in Alice's private cart with real-time coordination
 
-## ⚠️ PROFILES FUNCTIONALITY - TEMPORARILY DISABLED (2025-07-05)
+### =' IMMEDIATE DEVELOPMENT TASKS
 
-### 🚨 Android Platform Issue: DanglingZomeDependency
+#### Priority 1: Fix Basic Cart Functionality
+**Status**: L BROKEN - summon-shopper calls non-existent functions
 
-**Status**: Profiles removed to maintain Android compatibility
+**Issues**:
+- Calling `get_all_available_orders()` and `get_checked_out_carts()` - these functions don't exist
+- Not using cart clone architecture like summon-customer
+- Using old CartItem structure instead of new clone-based structure
 
-**Issue**: `DanglingZomeDependency("profiles_integrity", "profiles")` error occurs specifically on Android platform when profiles zomes are included in DNA.
+**Needs**:
+- Update to use same cart DNA functions as summon-customer: `get_current_items()`, `get_session_data()`
+- Copy exact CartTypes.ts from summon-customer (with upc, soldBy, addedOrder fields)
+- Implement proper cart clone joining (for now, just basic clone management)
 
-**Investigation Results**:
-- **✅ Desktop**: Profiles work perfectly with no issues
-- **❌ Android**: Confirmed Holochain platform bug, not configuration issue
-- **✅ All Versions**: HDK 0.5.3, HDI 0.6.3, profiles 0.501.0 - all correctly aligned
-- **✅ Configuration**: All settings correct per working examples
+#### Priority 2: Implement order_finder.dna
+**Status**: L NOT STARTED
 
-#### CURRENT SOLUTION:
-**Profiles Temporarily Removed** to enable full Android development:
-- DNA contains only cart zomes (no profiles)
-- All profile-related workspace dependencies removed
-- Complete restoration process documented in `PROFILESSETUP.md`
+**Needs**:
+- Create new `order_finder.dna` with OrderRequest entries and agent-specific anchors
+- Add to both summon-customer and summon-shopper happ.yaml configurations
+- Implement clone creation and management in both apps
 
-#### IMPACT:
-- **✅ Android Development**: Fully enabled without profiles
-- **✅ Barcode Scanner**: Can be tested and developed on mobile
-- **✅ Core Functionality**: All cart/order features working perfectly
-- **❌ Profile Names**: Display "John Smith" placeholder instead of real names
-- **❌ Avatars**: Generic avatars instead of user profiles
-
-#### FUTURE RESTORATION:
-**Complete restoration plan available** in `PROFILESSETUP.md`:
-- All profiles zome source code preserved in `summon-dnas`
-- Workspace dependencies documented for easy restoration
-- UI components ready for profiles
-- **Waiting on**: Holochain community fix for Android DanglingZomeDependency
-
-## ✅ BARCODE SCANNER IMPLEMENTATION - COMPLETED (2025-07-02)
-
-### Scanner Functionality - WORKING ✅
-**Status**: Full barcode scanning implementation complete and mobile-ready
-
-**Features**:
-- **Camera Integration**: Web camera access using @zxing/library v0.21.3
-- **UPC Validation**: Scanned barcodes compared against order product UPCs
-- **Real-time Feedback**: Success/error messages with visual indicators
-- **Mobile Ready**: Works in mobile browsers and Tauri mobile apps
-
-**User Flow**:
-- Order List → Order Detail → Click Product → Product Detail → Scan Button → Camera → Validation
-
-**Testing Status**:
-- **✅ Desktop**: Works with laptop webcam for development/testing
-- **✅ Mobile**: Ready for testing on Android device with camera
-
-## ✅ UPC DATA INTEGRATION - COMPLETED (2025-07-02)
-
-### Goal: UPC Support Throughout Data Pipeline ✅
-**Status**: UPC data flows from JSON → DHT → Cart → Checkout → Shopper App
-
-**Data Flow Architecture**:
-```
-JSON Product Data (has "upc": "0002100000728")
-    ↓ DHTSyncService.ts (extract upc field)
-DHT Product Entry (Product.upc)
-    ↓ CartBusinessService.ts (include upc in cart)
-Cart Item (CartItem.upc)
-    ↓ Checkout process (preserve upc)
-CartProduct Entry (CartProduct.upc) 
-    ↓ get_all_available_orders
-Shopper App Orders (with UPC embedded)
-    ↓ Barcode Scanner
-Compare scanned UPC vs embedded UPCs
+**Entry Types Needed**:
+```rust
+#[hdk_entry_helper]
+pub struct OrderRequest {
+    pub customer_pubkey: AgentPubKey,
+    pub customer_name: String,
+    pub cart_network_seed: String,
+    pub estimated_total: String,
+    pub delivery_time: String,
+    pub timestamp: u64,
+}
 ```
 
-**Implementation Complete**:
-- ✅ Backend DNA: UPC fields added to Product and CartProduct structs
-- ✅ Frontend summon: UPC extraction and cart integration
-- ✅ Frontend shopper: UPC available for scanning validation
-- ✅ End-to-end flow: UPC preserved through entire data pipeline
+#### Priority 3: Clone Discovery Integration
+**Status**: L NOT STARTED
 
-## ✅ CART CHECKOUT/RETURN FLOW - WORKING (2025-07-02)
+**Customer App Needs**:
+- "Join Shopper Network" UI (paste invite link)
+- "Publish Order" functionality (post cart network seed to shopper's finder)
+- order_finder.dna clone management service
 
-### Dual-Link System Working Correctly
+**Shopper App Needs**:
+- "Create Discovery Network" UI (create order_finder.dna clone + generate invite)
+- "Available Orders" view (query order_finder.dna for customer orders)
+- "Accept Order" functionality (join customer's cart.dna clone)
 
-**Checkout Process**:
-1. Creates `CheckedOutCart` entry with "processing" status
-2. Creates 2 links: Customer privacy + Shopper discovery
-3. Orders appear in shopper app for fulfillment
+### >� TESTING STRATEGY
 
-**Return to Shopping**:
-1. Updates cart status to "returned"
-2. Deletes both links completely
-3. Order disappears from shopper discovery
+**Full Integration Testing Required**:
+- Run summon-customer app (Alice persona)
+- Run summon-shopper app (Bob persona)  
+- Test complete flow: invite � join � order � discover � shop � deliver
+- Verify privacy: customers can't see each other's orders
+- Verify isolation: different shoppers can't access each other's networks
 
-**Current DNA Hash**: `uhC0kB_RFApHzMsRgiAcrW_DjUvBkFSRJE9IIDDXi6e7hl38ogsSw`
+### =� CURRENT CAPABILITIES
 
-## 🏗️ CURRENT DEVELOPMENT STATUS
+####  What Works:
+- **summon-customer**: Complete cart functionality with clone-based architecture
+- **summon-shopper**: Basic app structure and UI components exist
+- **cart.dna**: Fully functional with individual cart clone support
 
-### ✅ FULLY FUNCTIONAL FEATURES:
-- **Cross-Platform Compatibility**: Desktop and mobile working identically
-- **Fake Data Generation**: Realistic test orders for development
-- **Order Management**: Complete CRUD operations for orders
-- **Product Information**: Detailed product data with UPC codes
-- **Barcode Scanning**: Camera-based UPC validation ready for testing
-- **Cart Operations**: Checkout, return, status management
-- **Symlink Architecture**: Shared DNA source code management
+#### L What's Broken:
+- **summon-shopper cart queries**: Calling non-existent DNA functions
+- **Data structure mismatch**: Using old CartItem instead of new clone-based structure
+- **No discovery system**: Can't find or join customer cart clones
 
-### 🔧 CURRENT DEVELOPMENT FOCUS:
-**Primary**: Barcode scanner testing and refinement on mobile Android
-**Secondary**: Additional shopper app features and UI enhancements
-**Future**: Profile functionality restoration when Android platform issue resolved
+#### =� What's Missing:
+- **order_finder.dna**: Entire discovery system DNA not yet created
+- **Clone discovery services**: Frontend logic for managing discovery and cart clones
+- **Integration testing**: End-to-end shopper-customer coordination testing
 
-### ⚠️ KNOWN LIMITATIONS:
-- **Profiles**: Temporarily disabled due to Android platform bug
-- **Network Sync**: Not currently needed for development (using fake data)
-- **Real Products**: Using test data, not connected to live product catalog
+### <� DEVELOPMENT PRIORITY ORDER
 
-### 📱 TESTING CAPABILITIES:
-- **Desktop**: Full development environment with all features
-- **Mobile**: Full functionality including camera access for barcode scanning
-- **Fake Orders**: Generate realistic test data for any scenario
-- **UPC Validation**: Test barcode scanning with embedded product UPCs
+1. **IMMEDIATE**: Fix summon-shopper cart functionality to match summon-customer
+2. **NEXT**: Create order_finder.dna with OrderRequest entries and discovery functions  
+3. **THEN**: Implement clone management services in both apps
+4. **FINALLY**: Build complete discovery UI and test full shopper-customer flow
 
-## 📋 DEVELOPMENT COMMANDS
+### = ARCHITECTURE BENEFITS
 
-### Build and Run:
-```bash
-# Build DNA and HAPP
-npm run build:happ
+**Perfect Privacy**: Agent-specific anchors prevent customers from seeing each other's orders
+**Infinite Scale**: Each shopper manages independent discovery network with 10-100 customers
+**Zero Platform Fees**: Pure peer-to-peer coordination between shoppers and customers
+**Cryptographic Accountability**: All participants visible via pubkeys, violations traceable
 
-# Desktop development
-npm run network:tauri
+---
 
-# Mobile development (with memory limit)
-CARGO_BUILD_JOBS=1 npm run network:android
-```
-
-### Testing:
-- **Fake Orders**: Available in mobile app for testing scanner
-- **Desktop**: Full order management and fake data generation
-- **Mobile**: Camera access and barcode validation ready
-
-## 🎯 NEXT DEVELOPMENT PRIORITIES
-
-1. **Barcode Scanner Refinement**: Test and improve mobile camera scanning
-2. **UI/UX Enhancements**: Optimize shopper workflow and user experience  
-3. **Additional Features**: Implement any missing shopper functionality
-4. **Profile Integration**: Restore when Holochain resolves Android issue
-
-**Current State**: Production-ready for barcode scanner development and testing! 🚀
-
-npm run android-only
+**Current Focus**: Getting basic cart functionality working in summon-shopper so we can then build the beautiful discovery system on top! =�
