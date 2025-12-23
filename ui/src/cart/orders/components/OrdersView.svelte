@@ -34,13 +34,19 @@
 
   // Set up client when it becomes available (Svelte 4 way)
   $: if (client) {
-    setOrdersClient(client);
-    loadCheckedOutCarts().catch((error) => {
-      console.error("Error loading checked out carts:", error);
+    initializeClientAndLoadOrders();
+  }
+
+  async function initializeClientAndLoadOrders() {
+    try {
+      await setOrdersClient(client);
+      await loadCheckedOutCarts();
+    } catch (error) {
+      console.error("Error initializing client or loading orders:", error);
       const errorMsg = error instanceof Error ? error.message : String(error);
-      errorMessage = "Failed to load checked out carts: " + errorMsg;
+      errorMessage = "Failed to initialize: " + errorMsg;
       isLoading = false;
-    });
+    }
   }
 
   async function loadCheckedOutCarts() {
@@ -48,7 +54,7 @@
       isLoading = true;
       errorMessage = "";
 
-      // Use functional OrdersService
+      // Use functional OrdersService with shared order finder DNA
       const result = await loadOrders();
 
       if (result.success) {
@@ -132,7 +138,7 @@
     </button>
     <div class="header-content">
       <h1>Available Orders</h1>
-      <p>Orders from the network that need fulfillment</p>
+      <p>Orders from customers that need fulfillment</p>
     </div>
     <!-- ============================================================================ -->
     <!-- FAKE DATA BUTTON FOR TESTING - REMOVE FOR PRODUCTION -->
@@ -157,7 +163,7 @@
       <div class="empty-state scale-in">
         <ShoppingCart size={64} color="var(--border)" />
         <h2>No Available Orders</h2>
-        <p>Orders from customers will appear here when they checkout.</p>
+        <p>Orders from customers will appear here when they create carts.</p>
       </div>
     {:else}
       <div class="carts-grid">
@@ -221,6 +227,12 @@
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
     font-size: var(--font-size-md);
+  }
+
+  .network-status {
+    font-size: var(--font-size-sm);
+    opacity: 0.8;
+    margin-top: 4px;
   }
 
   .avatar-button {
@@ -294,6 +306,28 @@
   /* ============================================================================ */
   /* END FAKE DATA BUTTON STYLES - REMOVE FOR PRODUCTION */
   /* ============================================================================ */
+
+  .discovery-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--btn-transition);
+    color: var(--button-text);
+    padding: 0;
+    margin-right: 8px;
+    font-size: 20px;
+  }
+
+  .discovery-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(var(--hover-scale-subtle));
+  }
 
   .refresh-button {
     display: flex;
@@ -405,5 +439,30 @@
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+  }
+
+  .discovery-manager-container {
+    background: var(--background);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: var(--spacing-lg);
+    overflow: hidden;
+  }
+
+  .setup-btn {
+    background: var(--primary);
+    color: var(--button-text);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--card-border-radius);
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: var(--spacing-md);
+    transition: var(--btn-transition);
+  }
+
+  .setup-btn:hover {
+    background: var(--secondary);
+    transform: scale(var(--hover-scale-subtle));
   }
 </style>

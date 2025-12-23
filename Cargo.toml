@@ -16,7 +16,7 @@ resolver = "2"
 hdi = "=0.6.4"
 hdk = "=0.5.4"
 holochain_serialized_bytes = "*"
-holochain_types = "0.3.2"
+holochain_types = "0.5.4"
 mio = "0.8"
 serde = "1.0"
 

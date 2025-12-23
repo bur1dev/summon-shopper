@@ -2,6 +2,8 @@ import { encodeHash, decodeHash, callZome } from '../utils/zomeHelpers';
 import { createSuccessResult, createErrorResult, validateClient } from '../utils/errorHelpers';
 import type { ActionHashB64 } from '../types/CartTypes';
 import { setProfileClient, getCustomerProfile, getCustomerDisplayName, type CustomerProfile } from '../../profile/services/ProfileService';
+import { setCartCloneClient, initializeCartClone, getCartCloneCellId, joinCustomerCartClone } from './CartCloneService';
+import { setOrderFinderClient, getAvailableOrders } from './OrderFinderService';
 
 let client: any = null;
 
@@ -10,6 +12,13 @@ export async function setOrdersClient(holoClient: any) {
     
     // Also set the profile client for customer lookups
     setProfileClient(holoClient);
+    
+    // Initialize cart clone service
+    setCartCloneClient(holoClient);
+    await initializeCartClone();
+    
+    // Initialize order finder service
+    setOrderFinderClient(holoClient);
     
     // 🔥 LOG DNA HASH FROM ORDERS SERVICE 🔥
     try {
@@ -32,42 +41,89 @@ export async function setOrdersClient(holoClient: any) {
 }
 
 
-// SIMPLIFIED: Load orders - no product lookups needed!
+// Load orders from shared order finder DNA
 export async function loadOrders() {
-    console.log("🚀 SHOPPER DEBUG: Starting loadOrders()");
-    console.log("🚀 SHOPPER DEBUG: Client is:", client);
+    console.log("🚀 SHOPPER DEBUG: Starting loadOrders() from shared order finder");
     
-    
-    const clientError = validateClient(client, 'loading checked out carts');
+    const clientError = validateClient(client, 'loading orders from order finder');
     if (clientError) {
         console.log("🚀 SHOPPER DEBUG: Client validation failed:", clientError);
         return clientError;
     }
 
     try {
-        console.log("🚀 SHOPPER DEBUG: About to call get_all_checked_out_carts zome...");
+        console.log(`🚀 SHOPPER DEBUG: Getting orders from shared order finder DNA`);
+        const allOrderRequests = await getAvailableOrders();
+        console.log(`🚀 SHOPPER DEBUG: Found ${allOrderRequests.length} orders`);
         
-        // Test if the new function exists first
-        try {
-            console.log("🚀 SHOPPER DEBUG: Testing if get_all_available_orders function exists...");
-            const testResult = await callZome(client, 'cart', 'cart', 'get_all_available_orders', null);
-            console.log("🚀 SHOPPER DEBUG: get_all_available_orders function exists and returned:", testResult);
+        // Convert order requests to orders format for UI compatibility
+        const processedOrders = await Promise.all(allOrderRequests.map(async (orderReq) => {
+            const { request } = orderReq;
             
-            const processedCarts = await processOrders(testResult);
-            console.log("🚀 SHOPPER DEBUG: Processed carts:", processedCarts);
-            return createSuccessResult(processedCarts);
-        } catch (error) {
-            console.error("🚀 SHOPPER DEBUG: get_all_available_orders failed, trying fallback get_checked_out_carts:", error);
+            // Resolve customer profile
+            let customerProfile: CustomerProfile | null = null;
+            let customerName = request.customer_name || "Unknown Customer";
             
-            // Fallback to old function
-            const fallbackResult = await callZome(client, 'cart', 'cart', 'get_checked_out_carts', null);
-            console.log("🚀 SHOPPER DEBUG: Fallback result from get_checked_out_carts:", fallbackResult);
+            try {
+                customerProfile = await getCustomerProfile(request.customer_pubkey);
+                customerName = getCustomerDisplayName(customerProfile) || customerName;
+            } catch (error) {
+                console.error("🔍 PROFILE DEBUG: Error resolving customer profile:", error);
+            }
             
-            const processedCarts = await processOrders(fallbackResult);
-            return createSuccessResult(processedCarts);
-        }
+            return {
+                id: request.cart_network_seed,
+                cartHash: encodeHash(orderReq.action_hash),
+                products: [], // Will be loaded when shopper joins cart
+                total: 0, // Will be calculated when cart is loaded
+                createdAt: new Date(request.timestamp / 1000).toLocaleString(),
+                status: request.status,
+                deliveryAddress: null, // Private - will be available after joining cart
+                deliveryTime: { display: request.delivery_time },
+                deliveryInstructions: null,
+                customerName,
+                customerProfile,
+                customerPubKey: request.customer_pubkey,
+                // Discovery-specific fields
+                cartNetworkSeed: request.cart_network_seed,
+                estimatedTotal: request.estimated_total
+            };
+        }));
+        
+        console.log("🚀 SHOPPER DEBUG: Processed orders:", processedOrders);
+        return createSuccessResult(processedOrders);
+        
     } catch (error) {
-        console.error('🚀 SHOPPER DEBUG: Error loading checked out carts:', error);
+        console.error('🚀 SHOPPER DEBUG: Error loading orders from discovery networks:', error);
+        return createErrorResult(error);
+    }
+}
+
+// Load order details by joining customer's cart clone
+export async function loadOrderDetails(cartNetworkSeed: string) {
+    console.log(`🚀 SHOPPER DEBUG: Loading order details for cart: ${cartNetworkSeed}`);
+    
+    const clientError = validateClient(client, 'loading order details');
+    if (clientError) return clientError;
+    
+    try {
+        // Join the customer's cart clone
+        const customerCartCellId = await joinCustomerCartClone(cartNetworkSeed);
+        
+        // Get the cart session data
+        const sessionData = await client.callZome({
+            role_name: 'cart',
+            zome_name: 'cart',
+            fn_name: 'get_session_data',
+            payload: null,
+            cell_id: customerCartCellId
+        });
+        
+        console.log(`🚀 SHOPPER DEBUG: Customer cart session data:`, sessionData);
+        return createSuccessResult(sessionData);
+        
+    } catch (error) {
+        console.error(`🚀 SHOPPER DEBUG: Error loading order details:`, error);
         return createErrorResult(error);
     }
 }
@@ -129,7 +185,10 @@ async function processOrders(carts: any[]) {
                 productImageUrl: product.product_image_url,
                 priceAtCheckout: product.price_at_checkout,
                 promoPrice: product.promo_price,
+                soldBy: product.sold_by || null, // Add soldBy field
                 quantity: product.quantity,
+                timestamp: product.timestamp || Date.now(),
+                addedOrder: product.added_order || null, // Add addedOrder field
                 note: product.note,
                 // For backward compatibility with UI that might expect these fields:
                 details: {

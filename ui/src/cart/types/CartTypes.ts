@@ -19,12 +19,15 @@ export type ActionHashB64 = string;
 
 export interface CartItem {
     productId: string;
+    upc?: string;
     productName: string;
     productImageUrl?: string;
     priceAtCheckout: number; // Frozen regular price
     promoPrice?: number; // Frozen promo price (if available)
+    soldBy?: string; // "UNIT" or "WEIGHT" - needed for correct increment/decrement behavior
     quantity: number;
     timestamp: number;
+    addedOrder?: number; // Stable ordering field for display - never changes once set
     note?: string;
 }
 

@@ -1,137 +1,164 @@
 # Summon Shopper App - Development Status
 
-## =¨ CRITICAL DEVELOPMENT STATUS (2025-08-03)
+## âœ… CURRENT STATUS (2025-12-22)
 
-### Current State: MAJOR REFACTORING NEEDED
+### BOOTSTRAP SERVER - FIXED!
 
-**L BROKEN**: Summon-shopper app is currently broken due to DNA architecture mismatch
+**The bootstrap server configuration is now working!** Both summon-customer and summon-shopper successfully connect to the same DHT network and can communicate.
 
-**Root Issue**: The customer app (summon-customer) has been completely refactored to use a new clone-based cart architecture, but the shopper app is still using the old cart structure and calling functions that no longer exist.
+**Proof:** When customer creates an order and checks out, the order appears in the shopper app's Orders view! ðŸŽ‰
 
-### <× THE NEW ARCHITECTURE VISION
+**How it works:** See `BOOTSTRAP.md` for complete configuration details. Key fix was moving `UI_PORT` environment variable before `concurrently` in package.json.
 
-#### Complete Shopper-Customer Discovery System (NOT YET IMPLEMENTED)
+### NEXT ISSUE TO DEBUG
 
-**Two-DNA System Architecture**:
+Orders are successfully transmitted between apps, BUT there are data display issues:
+- âŒ Products in orders not displaying correctly
+- âŒ Profiles not reading properly
+- âœ… Order metadata shows up (customer info, etc.)
 
-1. **`order_finder.dna`** (Per-Shopper Discovery Networks) - NOT YET CREATED
-   - Each shopper creates their own private discovery network
-   - Customers join via invite links and post their cart network seeds
-   - Agent-specific anchors ensure perfect customer-to-customer privacy
-
-2. **`cart.dna`** (Per-Order Sessions) - EXISTS BUT NEEDS DISCOVERY INTEGRATION
-   - Each customer order creates a fresh cart.dna clone
-   - Shoppers join customer cart clones using discovered network seeds
-   - Real-time shopping coordination between one customer and one shopper
-
-#### The Complete User Flow (FUTURE IMPLEMENTATION)
-
-**Phase 1: Shopper Setup**
-1. Bob (shopper) creates `order_finder.dna` clone: `"bob_smith_encinitas_finder_xyz"`
-2. Bob generates invite link/QR code for his discovery network
-3. Bob distributes this link: "Join Bob's grocery delivery network!"
-
-**Phase 2: Customer Onboarding**
-1. Alice sees Bob's invite, scans QR code in summon-customer app
-2. Alice's app joins Bob's `order_finder.dna` clone permanently
-3. Alice can now post orders to her private anchor in Bob's discovery network
-
-**Phase 3: Order Discovery & Shopping**
-1. Alice creates private `cart.dna` clone: `"alice_cart_monday_groceries_abc123"`
-2. Alice fills cart, publishes cart network seed to Bob's `order_finder.dna`
-3. Bob's summon-shopper queries his `order_finder.dna` ’ discovers Alice's order
-4. Bob joins Alice's `cart.dna` clone using her network seed
-5. Bob shops in Alice's private cart with real-time coordination
-
-### =' IMMEDIATE DEVELOPMENT TASKS
-
-#### Priority 1: Fix Basic Cart Functionality
-**Status**: L BROKEN - summon-shopper calls non-existent functions
-
-**Issues**:
-- Calling `get_all_available_orders()` and `get_checked_out_carts()` - these functions don't exist
-- Not using cart clone architecture like summon-customer
-- Using old CartItem structure instead of new clone-based structure
-
-**Needs**:
-- Update to use same cart DNA functions as summon-customer: `get_current_items()`, `get_session_data()`
-- Copy exact CartTypes.ts from summon-customer (with upc, soldBy, addedOrder fields)
-- Implement proper cart clone joining (for now, just basic clone management)
-
-#### Priority 2: Implement order_finder.dna
-**Status**: L NOT STARTED
-
-**Needs**:
-- Create new `order_finder.dna` with OrderRequest entries and agent-specific anchors
-- Add to both summon-customer and summon-shopper happ.yaml configurations
-- Implement clone creation and management in both apps
-
-**Entry Types Needed**:
-```rust
-#[hdk_entry_helper]
-pub struct OrderRequest {
-    pub customer_pubkey: AgentPubKey,
-    pub customer_name: String,
-    pub cart_network_seed: String,
-    pub estimated_total: String,
-    pub delivery_time: String,
-    pub timestamp: u64,
-}
-```
-
-#### Priority 3: Clone Discovery Integration
-**Status**: L NOT STARTED
-
-**Customer App Needs**:
-- "Join Shopper Network" UI (paste invite link)
-- "Publish Order" functionality (post cart network seed to shopper's finder)
-- order_finder.dna clone management service
-
-**Shopper App Needs**:
-- "Create Discovery Network" UI (create order_finder.dna clone + generate invite)
-- "Available Orders" view (query order_finder.dna for customer orders)
-- "Accept Order" functionality (join customer's cart.dna clone)
-
-### >ê TESTING STRATEGY
-
-**Full Integration Testing Required**:
-- Run summon-customer app (Alice persona)
-- Run summon-shopper app (Bob persona)  
-- Test complete flow: invite ’ join ’ order ’ discover ’ shop ’ deliver
-- Verify privacy: customers can't see each other's orders
-- Verify isolation: different shoppers can't access each other's networks
-
-### =Ë CURRENT CAPABILITIES
-
-####  What Works:
-- **summon-customer**: Complete cart functionality with clone-based architecture
-- **summon-shopper**: Basic app structure and UI components exist
-- **cart.dna**: Fully functional with individual cart clone support
-
-#### L What's Broken:
-- **summon-shopper cart queries**: Calling non-existent DNA functions
-- **Data structure mismatch**: Using old CartItem instead of new clone-based structure
-- **No discovery system**: Can't find or join customer cart clones
-
-#### =§ What's Missing:
-- **order_finder.dna**: Entire discovery system DNA not yet created
-- **Clone discovery services**: Frontend logic for managing discovery and cart clones
-- **Integration testing**: End-to-end shopper-customer coordination testing
-
-### <¯ DEVELOPMENT PRIORITY ORDER
-
-1. **IMMEDIATE**: Fix summon-shopper cart functionality to match summon-customer
-2. **NEXT**: Create order_finder.dna with OrderRequest entries and discovery functions  
-3. **THEN**: Implement clone management services in both apps
-4. **FINALLY**: Build complete discovery UI and test full shopper-customer flow
-
-### = ARCHITECTURE BENEFITS
-
-**Perfect Privacy**: Agent-specific anchors prevent customers from seeing each other's orders
-**Infinite Scale**: Each shopper manages independent discovery network with 10-100 customers
-**Zero Platform Fees**: Pure peer-to-peer coordination between shoppers and customers
-**Cryptographic Accountability**: All participants visible via pubkeys, violations traceable
+The DHT communication is working - this is now a data parsing/display issue in the UI.
 
 ---
 
-**Current Focus**: Getting basic cart functionality working in summon-shopper so we can then build the beautiful discovery system on top! =€
+## PREVIOUS STATUS (2025-08-05)
+
+###  WHAT WORKS
+
+#### DNA Architecture - Fixed 
+- **Shared DNA System**: Both summon-customer and summon-shopper now use symlinks to shared DNAs in `/home/bur1/Holochain/summon-dnas/`
+- **No More Duplicates**: DNA builds happen only once from shared location
+- **Identical Code**: Both apps compile from exact same source code
+
+#### Customer Checkout Flow - Working 
+1. **Cart Creation**: Customer creates cart clone with their `agentPubKeyB64` as network seed
+2. **Cart Population**: Customer adds items to their private cart.dna clone
+3. **Checkout Process**: When customer clicks "Publish Order":
+   -  Calls `publish_order` on cart.dna (changes status to "Checkout")
+   -  Posts cart network seed to shared order_finder.dna using `postOrderRequest()`
+   -  Creates OrderRequest entry with customer info and cart network seed
+
+#### Network Configuration - Working 
+- **Bootstrap Server**: Both apps configured to use same port (currently 39101)
+- **DNA Hashes Match**: Verified identical order_finder.dna hash across both apps:
+  ```
+  Customer: 132, 45, 36, 186, 248, 94, 240, 199, 200, 74, 242, 152, 153, 235, 212...
+  Shopper:  132, 45, 36, 186, 248, 94, 240, 199, 200, 74, 242, 152, 153, 235, 212...
+  ```
+
+### L WHAT'S BROKEN
+
+#### Order Discovery System - NOT WORKING L
+**Problem**: Shopper can't see customer orders despite successful posting
+
+**Evidence**:
+-  Customer logs show successful order posting: `=
+ CUSTOMER: Posted order request: [hash]`
+-  Customer logs confirm: ` Frontend: Cart network seed posted to order_finder`
+- L Shopper logs show: `=
+ SHOPPER: Retrieved 0 orders from shared network`
+- L Shopper UI displays: "No Available Orders"
+
+**Network Seed Posted**: `uhCAkf_3Vu-DjkhU0UXw_ldSlKThex0LAuUO34lTY2DZnXtUh2ecA`
+
+### = THE INTENDED WORKFLOW
+
+#### Complete Customer-to-Shopper Discovery Flow
+
+**Phase 1: Customer Creates Order**
+1. Customer opens summon-customer app
+2. Creates cart.dna clone with `agentPubKeyB64` as network seed
+3. Adds items to cart (UPC scanning, product selection, etc.)
+4. Sets delivery address and time preferences
+5. Clicks "Publish Order" / Checkout
+
+**Phase 2: Customer Posts to Discovery Network** 
+1. `CheckoutService.publishOrder()` executes:
+   - Calls `publish_order` on customer's cart.dna clone (status ï¿½ "Checkout")
+   - Gets cart network seed: `encodeHashToBase64(client.myPubKey)`
+   - Calls `OrderFinderService.postOrderRequest()` with:
+     - customer_name: "Customer" 
+     - cart_network_seed: (e.g., "uhCAkf_3Vu-DjkhU0UXw_ldSlKThex0LAuUO34lTY2DZnXtUh2ecA")
+     - estimated_total: "$0.00"
+     - delivery_time: "ASAP"
+     - timestamp: microseconds
+     - status: "posted"
+
+**Phase 3: Shopper Discovery**
+1. Shopper opens summon-shopper app
+2. OrdersView component calls `OrdersService.loadOrders()`
+3. Calls `OrderFinderService.getAvailableOrders()` 
+4. Queries shared order_finder.dna for all OrderRequest entries
+5. **SHOULD** return array of available orders with cart network seeds
+
+**Phase 4: Shopper Joins Customer Cart** (Not Yet Implemented)
+1. Shopper sees available orders in UI
+2. Clicks "Accept Order" for specific customer
+3. `CartCloneService.joinCartClone(networkSeed)` should:
+   - Create clone of cart.dna using customer's network seed
+   - Join customer's private cart network
+   - Load customer's cart items, address, preferences
+   - Begin shopping process
+
+### =
+ CURRENT DEBUGGING STATUS
+
+#### Network Connectivity - Verified 
+- Both apps connect to same bootstrap server (port 39101)
+- Both apps show identical order_finder.dna hashes
+- Customer successfully posts OrderRequest entries
+
+#### Data Flow Issue - UNRESOLVED L
+- Customer posts orders ï¿½ order_finder.dna receives them
+- Shopper queries order_finder.dna ï¿½ gets 0 results
+- Same DNA, same network, but no data transfer
+
+### =ï¿½ IMMEDIATE ISSUE TO SOLVE
+
+**Root Problem**: order_finder.dna data isolation or network segmentation
+
+**Possible Causes**:
+1. **Network Segmentation**: Apps on different DHT networks despite same bootstrap
+2. **Timing Issues**: Order entries not yet propagated when shopper queries
+3. **Query Function Bug**: `get_available_orders` implementation issue
+4. **Entry Validation**: OrderRequest entries failing validation/storage
+
+### =' DEBUGGING NEXT STEPS
+
+1. **Add Network Logging**: Verify both apps see same peers on DHT
+2. **Add DHT Query Logging**: See what `get_available_orders` actually finds
+3. **Test Entry Storage**: Verify OrderRequest entries persist in DHT
+4. **Manual DHT Inspection**: Use conductor admin interface to verify data
+
+### =ï¿½ KEY FILES
+
+#### Customer App (Working)
+- `ui/src/cart/services/CheckoutService.ts` - Posts cart network seed on checkout
+- `ui/src/cart/services/OrderFinderService.ts` - Posts to order_finder.dna
+
+#### Shopper App (Broken Discovery)
+- `ui/src/cart/services/OrdersService.ts` - Queries order_finder.dna  
+- `ui/src/cart/services/OrderFinderService.ts` - Gets available orders
+- `ui/src/cart/orders/components/OrdersView.svelte` - UI shows 0 orders
+
+#### Shared DNA
+- `summon-dnas/order_finder/` - Discovery network DNA (symlinked to both apps)
+
+### <ï¿½ SUCCESS CRITERIA
+
+When working correctly:
+1. Customer checks out ï¿½ OrderRequest appears in order_finder.dna
+2. Shopper refreshes ï¿½ Shows customer's order with cart network seed  
+3. Shopper accepts order ï¿½ Joins customer's cart.dna clone
+4. Shopper sees customer's items, address, delivery preferences
+5. Real-time coordination for shopping and delivery
+
+**Current Status**: Steps 1-2 broken, rest not yet implemented. 
+
+TO CONFIRM WE ARE ON THE SAME DNA RUN THIS IN BOTH APP TERMINALS:
+
+ For summon-shopper:
+  cd /home/bur1/Holochain/summon-shopper
+  hc dna hash dnas/cart/workdir/cart.dna
+  hc dna hash dnas/profiles/workdir/profiles.dna
+  hc dna hash dnas/order_finder/workdir/order_finder.dna
