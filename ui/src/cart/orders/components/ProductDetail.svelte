@@ -15,13 +15,13 @@
   // Create array with just this product's UPC for validation
   const targetUPCs = product.upc ? [product.upc] : [];
 
-  console.log(`[PRODUCT DETAIL] Product: ${product.productName}`);
+  console.log(`[PRODUCT DETAIL] Product: ${product.product_name}`);
   console.log(`[PRODUCT DETAIL] UPC: ${product.upc || 'MISSING'}`);
   console.log(`[PRODUCT DETAIL] Target UPCs for scanning:`, targetUPCs);
 
   // Scanner functions
   function openScanner() {
-    console.log('[SCANNER] Opening scanner for product:', product.productName);
+    console.log('[SCANNER] Opening scanner for product:', product.product_name);
     scanFeedback = '';
     scanFeedbackType = '';
     scannerActive = true;
@@ -35,7 +35,7 @@
   function handleScanSuccess(event: CustomEvent) {
     const { upc, message } = event.detail;
     console.log(`[SCANNER] Scan success for product: ${message}`);
-    scanFeedback = `✅ ${product.productName} confirmed!`;
+    scanFeedback = `✅ ${product.product_name} confirmed!`;
     scanFeedbackType = 'success';
     isScanned = true;
     
@@ -48,7 +48,7 @@
   function handleScanError(event: CustomEvent) {
     const { upc, message } = event.detail;
     console.log(`[SCANNER] Scan error: ${message}`);
-    scanFeedback = `❌ Wrong item. Expected: ${product.productName}`;
+    scanFeedback = `❌ Wrong item. Expected: ${product.product_name}`;
     scanFeedbackType = 'error';
     
     // Keep scanner open for retry
@@ -75,14 +75,14 @@
   <!-- Product Card -->
   <div class="product-card">
     <div class="product-image">
-      <img src={product.productImageUrl} alt={product.productName} />
+      <img src={product.product_image_url} alt={product.product_name} />
     </div>
-    
+
     <div class="product-details">
-      <h2>{product.productName}</h2>
+      <h2>{product.product_name}</h2>
       <div class="product-meta">
         <p class="quantity">Quantity: {product.quantity}</p>
-        <p class="price">${product.priceAtCheckout.toFixed(2)}</p>
+        <p class="price">${product.price_at_checkout.toFixed(2)}</p>
       </div>
       
       {#if product.note}
