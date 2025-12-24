@@ -1,14 +1,14 @@
 <script lang="ts">
   import { MapPin, Clock, User } from "lucide-svelte";
   import OrderProductList from "./OrderProductList.svelte";
+  import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
 
   // Props
   export let item: any;
   export let onOrderClick: (order: any) => void;
-  
-  // Extract customer information
-  const customerName = item.customerName || "Customer";
-  const customerProfile = item.customerProfile;
+
+  // Customer pub key for agent-avatar component
+  const customerPubKeyB64 = item.customerPubKey;
   
 
   // Format status for display
@@ -48,12 +48,16 @@
 
     <div class="customer-section">
       <div class="customer-name">
-        <span class="customer-label">Customer:</span>
-        <span class="customer-value">{customerName}</span>
+        <span class="customer-label">Customer</span>
       </div>
       <div class="customer-avatar-small">
-        {#if customerProfile?.avatar}
-          <img src={customerProfile.avatar} alt={customerName} class="avatar-image-small" />
+        {#if customerPubKeyB64}
+          <agent-avatar
+            size={40}
+            agent-pub-key={customerPubKeyB64}
+            disable-tooltip={false}
+            disable-copy={true}
+          ></agent-avatar>
         {:else}
           <div class="avatar-placeholder-small">
             <User size={16} />
@@ -95,7 +99,13 @@
           <div class="delivery-content">
             <div class="delivery-label">Delivery Time:</div>
             <div>
-              {item.deliveryTime.date} at {item.deliveryTime.time}
+              {#if item.deliveryTime.date && item.deliveryTime.time}
+                {item.deliveryTime.date} at {item.deliveryTime.time}
+              {:else if item.deliveryTime.display}
+                {item.deliveryTime.display}
+              {:else}
+                Not specified
+              {/if}
             </div>
           </div>
         </div>

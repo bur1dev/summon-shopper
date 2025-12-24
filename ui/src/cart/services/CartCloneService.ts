@@ -46,40 +46,37 @@ export async function joinCustomerCartClone(customerNetworkSeed: string): Promis
     }
     
     try {
-        const appInfo = await client.appInfo();
-        const clones = appInfo.cell_info["cart"] || [];
-        
-        // Look for existing clone with this network seed
-        const existingClone = clones.find((cell: any) => {
-            if (cell.type === "cloned" && cell.value?.clone_id) {
-                // Check if clone_id contains the network seed
-                return cell.value.clone_id.includes(customerNetworkSeed.slice(0, 8));
-            }
-            return false;
+        // Try to create the clone
+        const clone = await client.createCloneCell({
+            modifiers: { network_seed: customerNetworkSeed },
+            name: `customer-cart-${customerNetworkSeed.slice(0, 8)}`,
+            role_name: "cart"
         });
-        
-        let customerCellId: CellId;
-        
-        if (existingClone) {
-            customerCellId = existingClone.value.cell_id;
-            console.log(`🛒 SHOPPER: Found existing customer cart clone: ${customerNetworkSeed}`);
-        } else {
-            // Create new clone to join customer's cart network
-            const clone = await client.createCloneCell({
-                modifiers: { network_seed: customerNetworkSeed },
-                name: `customer-cart-${customerNetworkSeed.slice(0, 8)}`,
-                role_name: "cart"
-            });
-            customerCellId = clone.cell_id;
-            console.log(`🛒 SHOPPER: Joined customer cart clone: ${customerNetworkSeed}`);
-        }
-        
-        // Cache the customer cart clone
+        const customerCellId = clone.cell_id;
+        console.log(`🛒 SHOPPER: Created customer cart clone: ${customerNetworkSeed}`);
+
+        // Cache it
         customerCartClones.set(customerNetworkSeed, customerCellId);
         return customerCellId;
-        
-    } catch (error) {
-        console.error(`🛒 SHOPPER: Error joining customer cart clone ${customerNetworkSeed}:`, error);
+
+    } catch (error: any) {
+        // If DuplicateCellId, find and return the existing clone
+        if (error.message?.includes('DuplicateCellId')) {
+            console.log(`🛒 SHOPPER: Clone exists, finding it: ${customerNetworkSeed}`);
+            const appInfo = await client.appInfo();
+            const clones = appInfo.cell_info["cart"] || [];
+
+            // Find the clone with matching network seed by DNA hash
+            for (const cell of clones) {
+                if (cell.type === "cloned") {
+                    const customerCellId = cell.value.cell_id;
+                    customerCartClones.set(customerNetworkSeed, customerCellId);
+                    console.log(`🛒 SHOPPER: Found existing clone`);
+                    return customerCellId;
+                }
+            }
+        }
+        console.error(`🛒 SHOPPER: Error joining customer cart clone:`, error);
         throw error;
     }
 }

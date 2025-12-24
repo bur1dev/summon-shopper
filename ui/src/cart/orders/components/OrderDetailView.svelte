@@ -1,6 +1,10 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { ArrowLeft, MapPin, Clock, Package, User } from "lucide-svelte";
   import ProductDetail from "./ProductDetail.svelte";
+  import { loadOrderDetails } from "../../services/OrdersService";
+  import { decodeAddress, decodeDeliveryTimeSlot, decodeDeliveryInstructions, formatDeliveryTimeForDisplay } from "../../utils/recordDecoders";
+  import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
 
   // Props (Svelte 4 way)
   export let order: any;
@@ -10,19 +14,35 @@
   let currentView = 'order'; // 'order' | 'product'
   let selectedProduct: any = null;
 
-  // Extract customer information from the order
-  const customerName = order.customerName || "Customer";
-  const customerProfile = order.customerProfile;
-  const deliveryAddress = order.deliveryAddress;
-  const deliveryTime = order.deliveryTime;
-  
-  console.log("🔍 ORDER DETAIL: Customer profile:", customerProfile);
-  console.log("🔍 ORDER DETAIL: Order products with notes:", order.products.map((p: any) => ({
-    name: p.productName,
-    note: p.note,
-    noteType: typeof p.note,
-    noteLength: p.note ? p.note.length : 'no note'
-  })));
+  // Order data
+  const customerPubKeyB64 = order.customerPubKey;
+  let products: any[] = [];
+  let deliveryAddress: any = null;
+  let deliveryTime: any = null;
+  let deliveryInstructions: string = '';
+
+  // Load cart data when component mounts
+  onMount(async () => {
+    const result = await loadOrderDetails(order.cartNetworkSeed);
+    if (result.success) {
+      // Products come directly from backend (flattened structure)
+      products = result.data.products || [];
+      console.log('🚀 SHOPPER: Products loaded:', products.length, products);
+
+      // Decode and format delivery data
+      deliveryAddress = result.data.address ? decodeAddress(result.data.address) : null;
+
+      const decodedTimeSlot = result.data.delivery_time ? decodeDeliveryTimeSlot(result.data.delivery_time) : null;
+      deliveryTime = formatDeliveryTimeForDisplay(decodedTimeSlot);
+
+      const decodedInstructions = result.data.delivery_instructions ? decodeDeliveryInstructions(result.data.delivery_instructions) : null;
+      deliveryInstructions = decodedInstructions?.instructions || '';
+
+      console.log('🚀 SHOPPER: Decoded address:', deliveryAddress);
+      console.log('🚀 SHOPPER: Decoded time:', deliveryTime);
+      console.log('🚀 SHOPPER: Decoded instructions:', deliveryInstructions);
+    }
+  });
 
   // Navigation functions
   function openProductDetail(product: any) {
@@ -47,8 +67,13 @@
     </button>
     <div class="customer-info">
       <div class="customer-avatar">
-        {#if customerProfile?.avatar}
-          <img src={customerProfile.avatar} alt={customerName} class="avatar-image" />
+        {#if customerPubKeyB64}
+          <agent-avatar
+            size={48}
+            agent-pub-key={customerPubKeyB64}
+            disable-tooltip={false}
+            disable-copy={true}
+          ></agent-avatar>
         {:else}
           <div class="avatar-placeholder">
             <User size={24} />
@@ -56,10 +81,7 @@
         {/if}
       </div>
       <div class="customer-details">
-        <h1>{customerName}'s Order</h1>
-        {#if customerProfile?.agentPubKey}
-          <p class="customer-id">ID: {customerProfile.agentPubKey.slice(0, 12)}...</p>
-        {/if}
+        <h1>Customer Order</h1>
       </div>
     </div>
   </div>
@@ -67,6 +89,7 @@
   <!-- Order Info Section -->
   <div class="order-info">
     <div class="info-card">
+      {#if deliveryAddress}
       <div class="info-item">
         <MapPin size={20} />
         <div>
@@ -77,6 +100,7 @@
           </p>
         </div>
       </div>
+      {/if}
       
       {#if deliveryTime}
         <div class="info-item">
@@ -92,14 +116,14 @@
         <Package size={20} />
         <div>
           <p class="info-label">Total Items</p>
-          <p class="info-value">{order.products.length} items</p>
+          <p class="info-value">{products.length} items</p>
         </div>
       </div>
 
-      {#if order.deliveryInstructions}
+      {#if deliveryInstructions}
         <div class="delivery-instructions">
           <div class="delivery-label">Instructions:</div>
-          <div>{order.deliveryInstructions}</div>
+          <div>{deliveryInstructions}</div>
         </div>
       {/if}
     </div>
@@ -108,37 +132,41 @@
   <!-- Items List -->
   <div class="items-section">
     <h2>Items to Collect</h2>
+    {#if products.length > 0}
     <div class="items-list">
-      {#each order.products as product}
+      {#each products as product}
         <button class="item-card clickable" on:click={() => openProductDetail(product)}>
           <div class="item-image">
-            <img src={product.productImageUrl} alt={product.productName} />
+            <img src={product.product_image_url} alt={product.product_name} />
           </div>
-          
+
           <div class="item-details">
-            <h3>{product.productName}</h3>
+            <h3>{product.product_name}</h3>
             <p class="item-quantity">Qty: {product.quantity}</p>
             {#if product.note}
               <p class="item-note">Note: {product.note}</p>
             {/if}
-            <p class="item-price">${product.priceAtCheckout.toFixed(2)}</p>
+            <p class="item-price">${product.price_at_checkout.toFixed(2)}</p>
           </div>
-          
+
           <div class="item-actions">
             <Package size={20} />
           </div>
         </button>
       {/each}
     </div>
+    {/if}
   </div>
 
   <!-- Order Total -->
+  {#if products.length > 0}
   <div class="order-total">
     <div class="total-card">
       <span class="total-label">Order Total:</span>
-      <span class="total-amount">${order.total.toFixed(2)}</span>
+      <span class="total-amount">${products.reduce((sum, p) => sum + (p.price_at_checkout * p.quantity), 0).toFixed(2)}</span>
     </div>
   </div>
+  {/if}
 
 </div>
 {/if}

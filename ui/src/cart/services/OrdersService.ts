@@ -1,100 +1,81 @@
 import { encodeHash, decodeHash, callZome } from '../utils/zomeHelpers';
 import { createSuccessResult, createErrorResult, validateClient } from '../utils/errorHelpers';
 import type { ActionHashB64 } from '../types/CartTypes';
-import { setProfileClient, getCustomerProfile, getCustomerDisplayName, type CustomerProfile } from '../../profile/services/ProfileService';
 import { setCartCloneClient, initializeCartClone, getCartCloneCellId, joinCustomerCartClone } from './CartCloneService';
 import { setOrderFinderClient, getAvailableOrders } from './OrderFinderService';
+import { decodeDeliveryTimeSlot, formatDeliveryTimeForDisplay } from '../utils/recordDecoders';
 
 let client: any = null;
 
 export async function setOrdersClient(holoClient: any) {
     client = holoClient;
-    
-    // Also set the profile client for customer lookups
-    setProfileClient(holoClient);
-    
-    // Initialize cart clone service
     setCartCloneClient(holoClient);
     await initializeCartClone();
-    
-    // Initialize order finder service
     setOrderFinderClient(holoClient);
-    
-    // 🔥 LOG DNA HASH FROM ORDERS SERVICE 🔥
-    try {
-        const appInfo = await client.appInfo();
-        if (appInfo?.cell_info) {
-            console.log("🔥 ORDERS SERVICE DNA VERIFICATION 🔥");
-            Object.entries(appInfo.cell_info).forEach(([roleName, cellInfo]) => {
-                if (Array.isArray(cellInfo) && cellInfo.length > 0) {
-                    const cell = cellInfo[0];
-                    if (cell.type === 'provisioned' && cell.value?.cell_id) {
-                        const dnaHash = cell.value.cell_id[0];
-                        console.log(`🔥 ORDERS SERVICE DNA HASH (${roleName}): ${dnaHash}`);
-                    }
-                }
-            });
-        }
-    } catch (error) {
-        console.error("🔥 ORDERS SERVICE: Failed to log DNA hash:", error);
-    }
 }
 
 
+/**
+ * Load delivery time for an order from customer's cart
+ * Returns formatted time or placeholder if unavailable
+ */
+async function loadDeliveryTimeForOrder(cartNetworkSeed: string, placeholderTime: string) {
+    try {
+        const detailsResult = await loadOrderDetails(cartNetworkSeed);
+        if (detailsResult.success && detailsResult.data.delivery_time) {
+            const decodedTimeSlot = decodeDeliveryTimeSlot(detailsResult.data.delivery_time);
+            return formatDeliveryTimeForDisplay(decodedTimeSlot) || { display: placeholderTime };
+        }
+    } catch (error) {
+        console.warn(`Could not load delivery time for ${cartNetworkSeed}:`, error);
+    }
+    return { display: placeholderTime };
+}
+
+/**
+ * Convert order request to UI-friendly order format
+ */
+function formatOrderForUI(orderReq: any, deliveryTime: any) {
+    const { request } = orderReq;
+
+    return {
+        id: request.cart_network_seed,
+        cartHash: encodeHash(orderReq.action_hash),
+        products: [],
+        total: 0,
+        createdAt: new Date(request.timestamp / 1000).toLocaleString(),
+        status: request.status,
+        deliveryAddress: null,
+        deliveryTime: deliveryTime,
+        deliveryInstructions: null,
+        customerPubKey: encodeHash(request.customer_pubkey),
+        cartNetworkSeed: request.cart_network_seed,
+        estimatedTotal: request.estimated_total
+    };
+}
+
 // Load orders from shared order finder DNA
 export async function loadOrders() {
-    console.log("🚀 SHOPPER DEBUG: Starting loadOrders() from shared order finder");
-    
     const clientError = validateClient(client, 'loading orders from order finder');
-    if (clientError) {
-        console.log("🚀 SHOPPER DEBUG: Client validation failed:", clientError);
-        return clientError;
-    }
+    if (clientError) return clientError;
 
     try {
-        console.log(`🚀 SHOPPER DEBUG: Getting orders from shared order finder DNA`);
         const allOrderRequests = await getAvailableOrders();
-        console.log(`🚀 SHOPPER DEBUG: Found ${allOrderRequests.length} orders`);
-        
-        // Convert order requests to orders format for UI compatibility
-        const processedOrders = await Promise.all(allOrderRequests.map(async (orderReq) => {
-            const { request } = orderReq;
-            
-            // Resolve customer profile
-            let customerProfile: CustomerProfile | null = null;
-            let customerName = request.customer_name || "Unknown Customer";
-            
-            try {
-                customerProfile = await getCustomerProfile(request.customer_pubkey);
-                customerName = getCustomerDisplayName(customerProfile) || customerName;
-            } catch (error) {
-                console.error("🔍 PROFILE DEBUG: Error resolving customer profile:", error);
-            }
-            
-            return {
-                id: request.cart_network_seed,
-                cartHash: encodeHash(orderReq.action_hash),
-                products: [], // Will be loaded when shopper joins cart
-                total: 0, // Will be calculated when cart is loaded
-                createdAt: new Date(request.timestamp / 1000).toLocaleString(),
-                status: request.status,
-                deliveryAddress: null, // Private - will be available after joining cart
-                deliveryTime: { display: request.delivery_time },
-                deliveryInstructions: null,
-                customerName,
-                customerProfile,
-                customerPubKey: request.customer_pubkey,
-                // Discovery-specific fields
-                cartNetworkSeed: request.cart_network_seed,
-                estimatedTotal: request.estimated_total
-            };
-        }));
-        
-        console.log("🚀 SHOPPER DEBUG: Processed orders:", processedOrders);
+        console.log(`📋 Found ${allOrderRequests.length} available orders`);
+
+        const processedOrders = await Promise.all(
+            allOrderRequests.map(async (orderReq) => {
+                const deliveryTime = await loadDeliveryTimeForOrder(
+                    orderReq.request.cart_network_seed,
+                    orderReq.request.delivery_time
+                );
+                return formatOrderForUI(orderReq, deliveryTime);
+            })
+        );
+
         return createSuccessResult(processedOrders);
-        
     } catch (error) {
-        console.error('🚀 SHOPPER DEBUG: Error loading orders from discovery networks:', error);
+        console.error('Error loading orders:', error);
         return createErrorResult(error);
     }
 }
@@ -109,19 +90,34 @@ export async function loadOrderDetails(cartNetworkSeed: string) {
     try {
         // Join the customer's cart clone
         const customerCartCellId = await joinCustomerCartClone(cartNetworkSeed);
-        
-        // Get the cart session data
+
+        // Call get_current_items - EXACT same pattern as customer app
+        const products = await client.callZome({
+            cell_id: customerCartCellId,
+            zome_name: 'cart',
+            fn_name: 'get_current_items',
+            payload: null
+        });
+
+        // Call get_session_data for address/delivery info
         const sessionData = await client.callZome({
-            role_name: 'cart',
+            cell_id: customerCartCellId,
             zome_name: 'cart',
             fn_name: 'get_session_data',
-            payload: null,
-            cell_id: customerCartCellId
+            payload: null
         });
-        
-        console.log(`🚀 SHOPPER DEBUG: Customer cart session data:`, sessionData);
-        return createSuccessResult(sessionData);
-        
+
+        console.log(`🚀 SHOPPER: Loaded ${products?.length || 0} products from customer cart`);
+        console.log(`🚀 SHOPPER: Session data:`, sessionData);
+
+        return createSuccessResult({
+            products: products || [],
+            address: sessionData.address,
+            delivery_time: sessionData.delivery_time_slot,
+            delivery_instructions: sessionData.delivery_instructions,
+            session_status: sessionData.session_status
+        });
+
     } catch (error) {
         console.error(`🚀 SHOPPER DEBUG: Error loading order details:`, error);
         return createErrorResult(error);
