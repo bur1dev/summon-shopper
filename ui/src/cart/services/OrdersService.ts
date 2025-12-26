@@ -107,6 +107,7 @@ export async function loadOrderDetails(cartNetworkSeed: string) {
         });
 
         console.log(`🚀 SHOPPER: Loaded ${products?.length || 0} products from customer cart`);
+        console.log(`🚀 SHOPPER: Products data:`, products);
         console.log(`🚀 SHOPPER: Session data:`, sessionData);
 
         return createSuccessResult({

@@ -70,11 +70,13 @@ await client.callZome({
 **b) Post cart network seed to order_finder.dna:**
 ```typescript
 const cartNetworkSeed = encodeHashToBase64(client.myPubKey);
+const timeSlot = get(selectedDeliveryTimeSlot);
+const deliveryTimeStr = formatDeliveryTime(timeSlot); // e.g., "Monday, Dec 23 at 2pm-4pm"
 await postOrderRequest(
     'Customer',           // customer_name
     cartNetworkSeed,      // cart_network_seed (e.g., "uhCAkf_3Vu...")
     '$0.00',             // estimated_total
-    'ASAP'               // delivery_time (placeholder)
+    deliveryTimeStr      // actual delivery time from store
 );
 ```
 

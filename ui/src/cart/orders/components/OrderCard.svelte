@@ -1,13 +1,13 @@
 <script lang="ts">
   import { MapPin, Clock, User } from "lucide-svelte";
   import OrderProductList from "./OrderProductList.svelte";
-  import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
+  import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
 
   // Props
   export let item: any;
   export let onOrderClick: (order: any) => void;
 
-  // Customer pub key for agent-avatar component
+  // Customer pub key for profile-list-item component
   const customerPubKeyB64 = item.customerPubKey;
   
 
@@ -47,23 +47,14 @@
     </div>
 
     <div class="customer-section">
-      <div class="customer-name">
+      {#if customerPubKeyB64}
+        <profile-list-item agent-pub-key={customerPubKeyB64}></profile-list-item>
+      {:else}
+        <div class="avatar-placeholder-small">
+          <User size={16} />
+        </div>
         <span class="customer-label">Customer</span>
-      </div>
-      <div class="customer-avatar-small">
-        {#if customerPubKeyB64}
-          <agent-avatar
-            size={40}
-            agent-pub-key={customerPubKeyB64}
-            disable-tooltip={false}
-            disable-copy={true}
-          ></agent-avatar>
-        {:else}
-          <div class="avatar-placeholder-small">
-            <User size={16} />
-          </div>
-        {/if}
-      </div>
+      {/if}
     </div>
   </div>
 

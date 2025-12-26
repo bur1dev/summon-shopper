@@ -4,7 +4,7 @@
   import ProductDetail from "./ProductDetail.svelte";
   import { loadOrderDetails } from "../../services/OrdersService";
   import { decodeAddress, decodeDeliveryTimeSlot, decodeDeliveryInstructions, formatDeliveryTimeForDisplay } from "../../utils/recordDecoders";
-  import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
+  import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
 
   // Props (Svelte 4 way)
   export let order: any;
@@ -46,7 +46,7 @@
 
   // Navigation functions
   function openProductDetail(product: any) {
-    console.log('[NAVIGATION] Opening product detail for:', product.productName);
+    console.log('[NAVIGATION] Opening product detail for:', product.product_name);
     selectedProduct = product;
     currentView = 'product';
   }
@@ -66,23 +66,14 @@
       <ArrowLeft size={24} />
     </button>
     <div class="customer-info">
-      <div class="customer-avatar">
-        {#if customerPubKeyB64}
-          <agent-avatar
-            size={48}
-            agent-pub-key={customerPubKeyB64}
-            disable-tooltip={false}
-            disable-copy={true}
-          ></agent-avatar>
-        {:else}
-          <div class="avatar-placeholder">
-            <User size={24} />
-          </div>
-        {/if}
-      </div>
-      <div class="customer-details">
+      {#if customerPubKeyB64}
+        <profile-list-item agent-pub-key={customerPubKeyB64}></profile-list-item>
+      {:else}
+        <div class="avatar-placeholder">
+          <User size={24} />
+        </div>
         <h1>Customer Order</h1>
-      </div>
+      {/if}
     </div>
   </div>
 
@@ -95,8 +86,8 @@
         <div>
           <p class="info-label">Delivery Address</p>
           <p class="info-value">
-            {deliveryAddress.street}<br>
-            {deliveryAddress.city}, {deliveryAddress.state} {deliveryAddress.zip_code}
+            {deliveryAddress.street}{deliveryAddress.unit ? `, Unit ${deliveryAddress.unit}` : ''}<br>
+            {deliveryAddress.city}, {deliveryAddress.state} {deliveryAddress.zip}
           </p>
         </div>
       </div>
@@ -107,7 +98,10 @@
           <Clock size={20} />
           <div>
             <p class="info-label">Delivery Time</p>
-            <p class="info-value">{deliveryTime.time}</p>
+            <p class="info-value">
+              {deliveryTime.date}<br>
+              {deliveryTime.time}
+            </p>
           </div>
         </div>
       {/if}
@@ -142,7 +136,7 @@
 
           <div class="item-details">
             <h3>{product.product_name}</h3>
-            <p class="item-quantity">Qty: {product.quantity}</p>
+            <p class="item-quantity">Qty: {product.quantity}{product.sold_by === "WEIGHT" ? " lbs" : ""}</p>
             {#if product.note}
               <p class="item-note">Note: {product.note}</p>
             {/if}
@@ -204,44 +198,25 @@
     flex: 1;
   }
 
-  .customer-avatar {
+  .avatar-placeholder {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    overflow: hidden;
     background: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .avatar-placeholder {
     color: var(--button-text);
     opacity: 0.8;
+    margin-right: var(--spacing-md);
   }
 
-  .customer-details {
-    flex: 1;
-  }
-
-  .customer-details h1 {
+  .customer-info h1 {
     margin: 0;
     font-size: var(--btn-font-size-lg);
     font-weight: var(--font-weight-bold);
-  }
-
-  .customer-id {
-    margin: var(--spacing-xs) 0 0 0;
-    font-size: var(--font-size-sm);
-    opacity: 0.8;
-    font-family: monospace;
+    color: var(--button-text);
   }
 
   .back-button {

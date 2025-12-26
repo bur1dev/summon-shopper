@@ -72,15 +72,16 @@ The DHT communication is working - this is now a data parsing/display issue in t
 4. Sets delivery address and time preferences
 5. Clicks "Publish Order" / Checkout
 
-**Phase 2: Customer Posts to Discovery Network** 
+**Phase 2: Customer Posts to Discovery Network**
 1. `CheckoutService.publishOrder()` executes:
-   - Calls `publish_order` on customer's cart.dna clone (status � "Checkout")
+   - Calls `publish_order` on customer's cart.dna clone (status → "Checkout")
    - Gets cart network seed: `encodeHashToBase64(client.myPubKey)`
+   - Reads actual delivery time from `selectedDeliveryTimeSlot` store
    - Calls `OrderFinderService.postOrderRequest()` with:
-     - customer_name: "Customer" 
+     - customer_name: "Customer"
      - cart_network_seed: (e.g., "uhCAkf_3Vu-DjkhU0UXw_ldSlKThex0LAuUO34lTY2DZnXtUh2ecA")
      - estimated_total: "$0.00"
-     - delivery_time: "ASAP"
+     - delivery_time: Formatted string (e.g., "Monday, Dec 23 at 2pm-4pm")
      - timestamp: microseconds
      - status: "posted"
 
@@ -107,28 +108,6 @@ The DHT communication is working - this is now a data parsing/display issue in t
 - Both apps connect to same bootstrap server (port 39101)
 - Both apps show identical order_finder.dna hashes
 - Customer successfully posts OrderRequest entries
-
-#### Data Flow Issue - UNRESOLVED L
-- Customer posts orders � order_finder.dna receives them
-- Shopper queries order_finder.dna � gets 0 results
-- Same DNA, same network, but no data transfer
-
-### =� IMMEDIATE ISSUE TO SOLVE
-
-**Root Problem**: order_finder.dna data isolation or network segmentation
-
-**Possible Causes**:
-1. **Network Segmentation**: Apps on different DHT networks despite same bootstrap
-2. **Timing Issues**: Order entries not yet propagated when shopper queries
-3. **Query Function Bug**: `get_available_orders` implementation issue
-4. **Entry Validation**: OrderRequest entries failing validation/storage
-
-### =' DEBUGGING NEXT STEPS
-
-1. **Add Network Logging**: Verify both apps see same peers on DHT
-2. **Add DHT Query Logging**: See what `get_available_orders` actually finds
-3. **Test Entry Storage**: Verify OrderRequest entries persist in DHT
-4. **Manual DHT Inspection**: Use conductor admin interface to verify data
 
 ### =� KEY FILES
 

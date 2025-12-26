@@ -81,7 +81,7 @@
     <div class="product-details">
       <h2>{product.product_name}</h2>
       <div class="product-meta">
-        <p class="quantity">Quantity: {product.quantity}</p>
+        <p class="quantity">Quantity: {product.quantity}{product.sold_by === "WEIGHT" ? " lbs" : ""}</p>
         <p class="price">${product.price_at_checkout.toFixed(2)}</p>
       </div>
       

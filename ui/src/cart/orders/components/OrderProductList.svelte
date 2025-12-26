@@ -7,23 +7,23 @@
   {#each products as product}
     <div class="cart-product">
       <div class="product-image">
-        {#if product.details?.image_url}
+        {#if product.product_image_url}
           <img
-            src={product.details.image_url}
-            alt={product.details.name}
+            src={product.product_image_url}
+            alt={product.product_name}
           />
         {/if}
       </div>
       <div class="product-details">
         <div class="product-name">
-          {product.details?.name || "Unknown Product"}
+          {product.product_name || "Unknown Product"}
         </div>
         <div class="product-size">
-          {product.details?.size || "Standard"}
+          {product.sold_by === "WEIGHT" ? "/lb" : "each"}
         </div>
         <div class="product-quantity">
-          {product.quantity} × ${(
-            product.details?.price || 0
+          {product.quantity}{product.sold_by === "WEIGHT" ? " lbs" : ""} × ${(
+            product.price_at_checkout || 0
           ).toFixed(2)}
         </div>
         {#if product.note}
@@ -34,7 +34,7 @@
       </div>
       <div class="product-price">
         ${(
-          (product.details?.price || 0) * product.quantity
+          (product.price_at_checkout || 0) * product.quantity
         ).toFixed(2)}
       </div>
     </div>
