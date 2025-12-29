@@ -1,14 +1,23 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { ArrowLeft, MapPin, Clock, Package, User } from "lucide-svelte";
   import ProductDetail from "./ProductDetail.svelte";
   import { loadOrderDetails } from "../../services/OrdersService";
   import { decodeAddress, decodeDeliveryTimeSlot, decodeDeliveryInstructions, formatDeliveryTimeForDisplay } from "../../utils/recordDecoders";
+  import { decodeHashFromBase64 } from "@holochain/client";
   import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
+
+  // Signal imports
+  import { getClient } from "../../../contexts";
+  import { initCartSignalHandlers, clearCartState, loadCartItems, cartItemsArray, deliveryTime as signalDeliveryTime, deliveryInstructions as signalDeliveryInstructions, deliveryAddress as signalDeliveryAddress } from "../../../signals";
+  import { sendShopperJoined } from "../../../signals/sendSignal";
 
   // Props (Svelte 4 way)
   export let order: any;
   export let onBack: () => void;
+
+  // Get client from context
+  const clientStore = getClient();
 
   // View state
   let currentView = 'order'; // 'order' | 'product'
@@ -20,14 +29,42 @@
   let deliveryAddress: any = null;
   let deliveryTime: any = null;
   let deliveryInstructions: string = '';
+  let cartCellId: any = null;
+
+  // Signal cleanup function
+  let cleanupSignals: (() => void) | null = null;
+
+  // Track if store has been initialized (once true, always use store even if empty)
+  let storeInitialized = false;
+
+  // Reactive products from signal store (after store init, always use store to reflect removals)
+  $: displayProducts = storeInitialized ? $cartItemsArray : products;
+
+  // Reactive delivery info from signals (use signal store value if set, otherwise use local)
+  $: displayDeliveryInstructions = $signalDeliveryInstructions || deliveryInstructions;
+  $: displayDeliveryAddress = $signalDeliveryAddress || deliveryAddress;
+  $: displayDeliveryTime = $signalDeliveryTime || deliveryTime;
+
+  // Reactive selected product that updates when store changes (for live note updates in ProductDetail)
+  $: displaySelectedProduct = selectedProduct ?
+      ($cartItemsArray.find(p => p.product_id === selectedProduct.product_id) || selectedProduct) :
+      null;
 
   // Load cart data when component mounts
   onMount(async () => {
+    // Initialize signal handlers for real-time updates
+    cleanupSignals = initCartSignalHandlers();
+
     const result = await loadOrderDetails(order.cartNetworkSeed);
     if (result.success) {
       // Products come directly from backend (flattened structure)
       products = result.data.products || [];
+      cartCellId = result.data.cellId;
       console.log('🚀 SHOPPER: Products loaded:', products.length, products);
+
+      // Load products into signal store for reactive updates
+      loadCartItems(products);
+      storeInitialized = true;  // Now always use store, even if empty (for removals)
 
       // Decode and format delivery data
       deliveryAddress = result.data.address ? decodeAddress(result.data.address) : null;
@@ -41,7 +78,28 @@
       console.log('🚀 SHOPPER: Decoded address:', deliveryAddress);
       console.log('🚀 SHOPPER: Decoded time:', deliveryTime);
       console.log('🚀 SHOPPER: Decoded instructions:', deliveryInstructions);
+
+      // Send ShopperJoined signal to customer
+      if (cartCellId && customerPubKeyB64 && $clientStore.client) {
+        try {
+          const customerPubKey = decodeHashFromBase64(customerPubKeyB64);
+          // TODO: Get actual shopper name from profiles
+          const shopperName = "Shopper";
+          await sendShopperJoined($clientStore.client, cartCellId, customerPubKey, shopperName);
+          console.log('📡 SHOPPER: Sent ShopperJoined signal to customer');
+        } catch (err) {
+          console.warn('📡 SHOPPER: Could not send ShopperJoined signal:', err);
+        }
+      }
     }
+  });
+
+  // Cleanup on unmount
+  onDestroy(() => {
+    if (cleanupSignals) {
+      cleanupSignals();
+    }
+    clearCartState();
   });
 
   // Navigation functions
@@ -80,27 +138,27 @@
   <!-- Order Info Section -->
   <div class="order-info">
     <div class="info-card">
-      {#if deliveryAddress}
+      {#if displayDeliveryAddress}
       <div class="info-item">
         <MapPin size={20} />
         <div>
           <p class="info-label">Delivery Address</p>
           <p class="info-value">
-            {deliveryAddress.street}{deliveryAddress.unit ? `, Unit ${deliveryAddress.unit}` : ''}<br>
-            {deliveryAddress.city}, {deliveryAddress.state} {deliveryAddress.zip}
+            {displayDeliveryAddress.street}{displayDeliveryAddress.unit ? `, Unit ${displayDeliveryAddress.unit}` : ''}<br>
+            {displayDeliveryAddress.city}, {displayDeliveryAddress.state} {displayDeliveryAddress.zip}
           </p>
         </div>
       </div>
       {/if}
       
-      {#if deliveryTime}
+      {#if displayDeliveryTime}
         <div class="info-item">
           <Clock size={20} />
           <div>
             <p class="info-label">Delivery Time</p>
             <p class="info-value">
-              {deliveryTime.date}<br>
-              {deliveryTime.time}
+              {displayDeliveryTime.date}<br>
+              {displayDeliveryTime.time}
             </p>
           </div>
         </div>
@@ -110,14 +168,14 @@
         <Package size={20} />
         <div>
           <p class="info-label">Total Items</p>
-          <p class="info-value">{products.length} items</p>
+          <p class="info-value">{displayProducts.length} items</p>
         </div>
       </div>
 
-      {#if deliveryInstructions}
+      {#if displayDeliveryInstructions}
         <div class="delivery-instructions">
-          <div class="delivery-label">Instructions:</div>
-          <div>{deliveryInstructions}</div>
+          <div class="delivery-label">Delivery Instructions:</div>
+          <div>{displayDeliveryInstructions}</div>
         </div>
       {/if}
     </div>
@@ -126,12 +184,12 @@
   <!-- Items List -->
   <div class="items-section">
     <h2>Items to Collect</h2>
-    {#if products.length > 0}
+    {#if displayProducts.length > 0}
     <div class="items-list">
-      {#each products as product}
+      {#each displayProducts as product (product.product_id)}
         <button class="item-card clickable" on:click={() => openProductDetail(product)}>
           <div class="item-image">
-            <img src={product.product_image_url} alt={product.product_name} />
+            <img src={product.product_image_url || ''} alt={product.product_name} />
           </div>
 
           <div class="item-details">
@@ -140,7 +198,7 @@
             {#if product.note}
               <p class="item-note">Note: {product.note}</p>
             {/if}
-            <p class="item-price">${product.price_at_checkout.toFixed(2)}</p>
+            <p class="item-price">${(product.price_at_checkout ?? 0).toFixed(2)}</p>
           </div>
 
           <div class="item-actions">
@@ -153,11 +211,11 @@
   </div>
 
   <!-- Order Total -->
-  {#if products.length > 0}
+  {#if displayProducts.length > 0}
   <div class="order-total">
     <div class="total-card">
       <span class="total-label">Order Total:</span>
-      <span class="total-amount">${products.reduce((sum, p) => sum + (p.price_at_checkout * p.quantity), 0).toFixed(2)}</span>
+      <span class="total-amount">${displayProducts.reduce((sum, p) => sum + ((p.price_at_checkout ?? 0) * (p.quantity ?? 0)), 0).toFixed(2)}</span>
     </div>
   </div>
   {/if}
@@ -166,9 +224,9 @@
 {/if}
 
 <!-- Product Detail View -->
-{#if currentView === 'product' && selectedProduct}
-  <ProductDetail 
-    product={selectedProduct} 
+{#if currentView === 'product' && displaySelectedProduct}
+  <ProductDetail
+    product={displaySelectedProduct}
     onBack={backToOrderDetail}
   />
 {/if}

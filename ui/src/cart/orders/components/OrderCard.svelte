@@ -104,7 +104,7 @@
 
       {#if item.deliveryInstructions}
         <div class="delivery-instructions">
-          <div class="delivery-label">Instructions:</div>
+          <div class="delivery-label">Delivery Instructions:</div>
           <div>{item.deliveryInstructions}</div>
         </div>
       {/if}

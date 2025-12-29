@@ -115,7 +115,9 @@ export async function loadOrderDetails(cartNetworkSeed: string) {
             address: sessionData.address,
             delivery_time: sessionData.delivery_time_slot,
             delivery_instructions: sessionData.delivery_instructions,
-            session_status: sessionData.session_status
+            session_status: sessionData.session_status,
+            // Include cellId for signal sending
+            cellId: customerCartCellId
         });
 
     } catch (error) {

@@ -75,30 +75,20 @@
   <!-- Product Card -->
   <div class="product-card">
     <div class="product-image">
-      <img src={product.product_image_url} alt={product.product_name} />
+      <img src={product.product_image_url || ''} alt={product.product_name} />
     </div>
 
     <div class="product-details">
       <h2>{product.product_name}</h2>
       <div class="product-meta">
-        <p class="quantity">Quantity: {product.quantity}{product.sold_by === "WEIGHT" ? " lbs" : ""}</p>
-        <p class="price">${product.price_at_checkout.toFixed(2)}</p>
+        <p class="quantity">Quantity: {product.quantity ?? 0}{product.sold_by === "WEIGHT" ? " lbs" : ""}</p>
+        <p class="price">${(product.price_at_checkout ?? 0).toFixed(2)}</p>
       </div>
       
       {#if product.note}
         <div class="customer-note">
           <strong>Customer Note:</strong>
           <p>{product.note}</p>
-        </div>
-      {/if}
-
-      {#if product.upc}
-        <div class="upc-info">
-          <strong>UPC:</strong> <code>{product.upc}</code>
-        </div>
-      {:else}
-        <div class="no-upc-warning">
-          ⚠️ No UPC available for this product
         </div>
       {/if}
     </div>
@@ -284,26 +274,6 @@
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     line-height: 1.4;
-  }
-
-  .upc-info {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-  }
-
-  .upc-info code {
-    background: var(--surface);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: var(--font-size-xs);
-    color: var(--text-primary);
-  }
-
-  .no-upc-warning {
-    font-size: var(--font-size-sm);
-    color: #f44336;
-    font-weight: var(--font-weight-semibold);
   }
 
   .scan-section {

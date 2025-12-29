@@ -1,11 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { ShoppingCart, RefreshCw, TestTube } from "lucide-svelte";
+  import { ShoppingCart, RefreshCw } from "lucide-svelte";
   import { loadOrders, setOrdersClient } from "../../services/OrdersService";
-  // ============================================================================
-  // FAKE DATA IMPORTS FOR TESTING - REMOVE FOR PRODUCTION
-  // ============================================================================
-  import { callZome } from "../../utils/zomeHelpers";
   import { getClient } from "../../../contexts";
   import OrderCard from "./OrderCard.svelte";
   import ProfileEditor from "../../../profile/components/ProfileEditor.svelte";
@@ -82,33 +77,6 @@
     await loadCheckedOutCarts();
   }
 
-  // ============================================================================
-  // FAKE DATA GENERATION FOR TESTING - REMOVE FOR PRODUCTION
-  // ============================================================================
-  // This function calls the fake order generation zome function and then
-  // refreshes the orders list to show the new fake order immediately.
-  async function generateFakeOrder() {
-    try {
-      console.log("🧪 FAKE DATA: Generating fake order with butter UPC...");
-      
-      // Call the zome function we created in the DNA
-      const result = await callZome(client, 'cart', 'cart', 'generate_fake_order_with_butter', null);
-      
-      console.log("🧪 FAKE DATA: Fake order created with hash:", result);
-      
-      // Refresh the orders list to show the new fake order
-      await loadCheckedOutCarts();
-      
-      console.log("🧪 FAKE DATA: Orders refreshed - fake order should now appear");
-    } catch (error) {
-      console.error("🧪 FAKE DATA ERROR: Failed to generate fake order:", error);
-      errorMessage = "Failed to generate fake order: " + (error instanceof Error ? error.message : String(error));
-    }
-  }
-  // ============================================================================
-  // END FAKE DATA SECTION - REMOVE FOR PRODUCTION
-  // ============================================================================
-
   // Profile editor functions
   function handleAvatarClick() {
     if (!profileEditorComponent) return;
@@ -140,15 +108,6 @@
       <h1>Available Orders</h1>
       <p>Orders from customers that need fulfillment</p>
     </div>
-    <!-- ============================================================================ -->
-    <!-- FAKE DATA BUTTON FOR TESTING - REMOVE FOR PRODUCTION -->
-    <!-- ============================================================================ -->
-    <button class="fake-order-button" on:click={generateFakeOrder} disabled={isLoading} title="Generate Fake Order with Butter UPC">
-      <TestTube size={20} />
-    </button>
-    <!-- ============================================================================ -->
-    <!-- END FAKE DATA BUTTON - REMOVE FOR PRODUCTION -->
-    <!-- ============================================================================ -->
     <button class="refresh-button" on:click={refreshOrders} disabled={isLoading} title="Refresh Orders">
       <RefreshCw size={20} class={isLoading ? "spinning" : ""} />
     </button>
@@ -229,12 +188,6 @@
     font-size: var(--font-size-md);
   }
 
-  .network-status {
-    font-size: var(--font-size-sm);
-    opacity: 0.8;
-    margin-top: 4px;
-  }
-
   .avatar-button {
     display: flex;
     align-items: center;
@@ -268,65 +221,6 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.4);
     border: 2px solid rgba(255, 255, 255, 0.6);
-  }
-
-  /* ============================================================================ */
-  /* FAKE DATA BUTTON STYLES FOR TESTING - REMOVE FOR PRODUCTION */
-  /* ============================================================================ */
-  .fake-order-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 193, 7, 0.3); /* Amber/warning color for testing */
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: var(--btn-transition);
-    color: var(--button-text);
-    padding: 0;
-    margin-right: 8px; /* Space between fake and refresh buttons */
-  }
-
-  .fake-order-button:hover:not(:disabled) {
-    background: rgba(255, 193, 7, 0.5);
-    transform: scale(var(--hover-scale-subtle));
-  }
-
-  .fake-order-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  :global(.fake-order-button svg) {
-    color: var(--button-text);
-    stroke: var(--button-text);
-  }
-  /* ============================================================================ */
-  /* END FAKE DATA BUTTON STYLES - REMOVE FOR PRODUCTION */
-  /* ============================================================================ */
-
-  .discovery-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: var(--btn-transition);
-    color: var(--button-text);
-    padding: 0;
-    margin-right: 8px;
-    font-size: 20px;
-  }
-
-  .discovery-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(var(--hover-scale-subtle));
   }
 
   .refresh-button {
@@ -439,30 +333,5 @@
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
-  }
-
-  .discovery-manager-container {
-    background: var(--background);
-    border-radius: var(--card-border-radius);
-    box-shadow: var(--shadow-medium);
-    margin-bottom: var(--spacing-lg);
-    overflow: hidden;
-  }
-
-  .setup-btn {
-    background: var(--primary);
-    color: var(--button-text);
-    border: none;
-    padding: 12px 24px;
-    border-radius: var(--card-border-radius);
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: var(--spacing-md);
-    transition: var(--btn-transition);
-  }
-
-  .setup-btn:hover {
-    background: var(--secondary);
-    transform: scale(var(--hover-scale-subtle));
   }
 </style>

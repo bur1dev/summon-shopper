@@ -2,6 +2,7 @@ import type { AppClient, HolochainError } from "@holochain/client";
 import { AppWebsocket } from "@holochain/client";
 import { getContext } from "svelte";
 import { get, writable } from "svelte/store";
+import { signalService } from "./signals";
 
 export const CLIENT_CONTEXT_KEY = Symbol("holochain-client");
 
@@ -32,6 +33,9 @@ export function createClientStore() {
         const appInfo = await client.appInfo();
         console.log("🚀 SHOPPER DEBUG: Available app info:", appInfo);
         
+        // 📡 Initialize signal service for real-time updates
+        signalService.init(client);
+
         // 🔥 LOG DNA HASH FOR NETWORK VERIFICATION 🔥
         if (appInfo?.installed_app_id) {
           const roles = appInfo.cell_info;
