@@ -68,6 +68,21 @@ export type { SendSignalInput, SessionData, CartItem } from './CartClient';
 // Utility functions
 export { formatHour, formatTimeRange, formatDateLong, formatDateShort } from './utils';
 
+// Scan status utilities
+export {
+    SCAN_STATUS,
+    SCAN_COLORS,
+    normalizeStatus,
+    isStatusFound,
+    isStatusNotFound,
+    getScanRowStyle,
+    type ScanStatusString,
+    type NormalizedStatus,
+} from './scanStatus';
+
+// Scan status component
+export { default as ScanStatusIcon } from './components/ScanStatusIcon.svelte';
+
 // ============================================================================
 // APP-SPECIFIC EXPORTS (shopper's cart signal handlers)
 // ============================================================================
@@ -88,4 +103,5 @@ export {
     clearCartState,
     getCartItem,
     getItemScanStatus,
+    updateCartItemScanStatus,
 } from './stores/cartSignalStore';

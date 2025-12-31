@@ -27,3 +27,5 @@
 
 # symlinked shared DNAs (managed in summon-dnas repo)
 /dnas
+
+.md

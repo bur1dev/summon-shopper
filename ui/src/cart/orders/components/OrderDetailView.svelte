@@ -9,8 +9,7 @@
 
   // Signal imports
   import { getClient } from "../../../contexts";
-  import { initCartSignalHandlers, clearCartState, loadCartItems, cartItemsArray, deliveryTime as signalDeliveryTime, deliveryInstructions as signalDeliveryInstructions, deliveryAddress as signalDeliveryAddress } from "../../../signals";
-  import { sendShopperJoined } from "../../../signals/sendSignal";
+  import { initCartSignalHandlers, clearCartState, loadCartItems, cartItemsArray, deliveryTime as signalDeliveryTime, deliveryInstructions as signalDeliveryInstructions, deliveryAddress as signalDeliveryAddress, setPeer, clearPeer, ScanStatusIcon, getScanRowStyle, isStatusFound, isStatusNotFound, sendShopperJoined } from "../../../signals";
 
   // Props (Svelte 4 way)
   export let order: any;
@@ -79,6 +78,17 @@
       console.log('🚀 SHOPPER: Decoded time:', deliveryTime);
       console.log('🚀 SHOPPER: Decoded instructions:', deliveryInstructions);
 
+      // Store customer pubkey for sending signals back
+      if (customerPubKeyB64) {
+        try {
+          const customerPubKey = decodeHashFromBase64(customerPubKeyB64);
+          setPeer(customerPubKey, 'Customer');
+          console.log('📡 SHOPPER: Stored customer pubkey in peerStore');
+        } catch (err) {
+          console.warn('📡 SHOPPER: Could not decode customer pubkey:', err);
+        }
+      }
+
       // Send ShopperJoined signal to customer
       if (cartCellId && customerPubKeyB64 && $clientStore.client) {
         try {
@@ -100,6 +110,7 @@
       cleanupSignals();
     }
     clearCartState();
+    clearPeer();
   });
 
   // Navigation functions
@@ -187,7 +198,7 @@
     {#if displayProducts.length > 0}
     <div class="items-list">
       {#each displayProducts as product (product.product_id)}
-        <button class="item-card clickable" on:click={() => openProductDetail(product)}>
+        <button class="item-card clickable" style={getScanRowStyle(product.scan_status)} on:click={() => openProductDetail(product)}>
           <div class="item-image">
             <img src={product.product_image_url || ''} alt={product.product_name} />
           </div>
@@ -202,7 +213,11 @@
           </div>
 
           <div class="item-actions">
-            <Package size={20} />
+            {#if !isStatusFound(product.scan_status) && !isStatusNotFound(product.scan_status)}
+              <Package size={20} />
+            {:else}
+              <ScanStatusIcon status={product.scan_status} size={24} />
+            {/if}
           </div>
         </button>
       {/each}
@@ -228,6 +243,8 @@
   <ProductDetail
     product={displaySelectedProduct}
     onBack={backToOrderDetail}
+    client={$clientStore.client}
+    cellId={cartCellId}
   />
 {/if}
 
@@ -456,7 +473,6 @@
     flex-direction: column;
     gap: var(--spacing-xs);
   }
-
 
   .order-total {
     padding: var(--spacing-lg);

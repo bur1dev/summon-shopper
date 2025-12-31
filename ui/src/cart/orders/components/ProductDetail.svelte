@@ -1,23 +1,75 @@
 <script lang="ts">
-  import { ArrowLeft, Camera, Package, CheckCircle } from "lucide-svelte";
+  import { ArrowLeft, Camera, Package } from "lucide-svelte";
   import TauriBarcodeScanner from "../../components/TauriBarcodeScanner.svelte";
+  import { sendItemScanned, updateCartItemScanStatus, SCAN_STATUS, ScanStatusIcon, isStatusFound, isStatusNotFound } from "../../../signals";
+  import type { AppClient, CellId } from "@holochain/client";
 
   // Props
   export let product: any;
   export let onBack: () => void;
+  export let client: AppClient | null = null;
+  export let cellId: CellId | null = null;
 
   // Scanner state
   let scannerActive = false;
   let scanFeedback = '';
   let scanFeedbackType: 'success' | 'error' | '' = '';
-  let isScanned = false;
+  let isUpdating = false;
+
+  // Get scan status from product (from link tag via backend)
+  $: scanStatus = product.scan_status ?? SCAN_STATUS.PENDING;
+  $: isFound = isStatusFound(scanStatus);
+  $: isNotFound = isStatusNotFound(scanStatus);
 
   // Create array with just this product's UPC for validation
-  const targetUPCs = product.upc ? [product.upc] : [];
+  $: targetUPCs = product.upc ? [product.upc] : [];
 
   console.log(`[PRODUCT DETAIL] Product: ${product.product_name}`);
   console.log(`[PRODUCT DETAIL] UPC: ${product.upc || 'MISSING'}`);
-  console.log(`[PRODUCT DETAIL] Target UPCs for scanning:`, targetUPCs);
+  console.log(`[PRODUCT DETAIL] Scan Status: ${scanStatus}`);
+
+  // Mark item as scanned in Holochain + send signal to customer
+  async function markItemScanned(status: number) {
+    if (!client || !cellId || isUpdating) return;
+
+    isUpdating = true;
+    try {
+      // Call zome to persist scan status
+      await client.callZome({
+        cell_id: cellId,
+        zome_name: 'cart',
+        fn_name: 'mark_item_scanned',
+        payload: {
+          product_id: product.product_id,
+          scan_status: status,
+        },
+      });
+
+      // Update local store for reactive UI
+      updateCartItemScanStatus(product.product_id, status);
+
+      // Send signal to customer
+      const signalStatus = status === SCAN_STATUS.FOUND ? 'found' : 'not_found';
+      await sendItemScanned(client, cellId, product.product_id, signalStatus);
+
+      console.log(`[SCANNER] Marked item as ${signalStatus}:`, product.product_name);
+
+      // Update local feedback
+      if (status === SCAN_STATUS.FOUND) {
+        scanFeedback = `✅ ${product.product_name} confirmed!`;
+        scanFeedbackType = 'success';
+      } else {
+        scanFeedback = `❌ ${product.product_name} marked as not found`;
+        scanFeedbackType = 'error';
+      }
+    } catch (err) {
+      console.error('[SCANNER] Failed to mark item:', err);
+      scanFeedback = 'Failed to update scan status';
+      scanFeedbackType = 'error';
+    } finally {
+      isUpdating = false;
+    }
+  }
 
   // Scanner functions
   function openScanner() {
@@ -32,13 +84,13 @@
     scannerActive = false;
   }
 
-  function handleScanSuccess(event: CustomEvent) {
+  async function handleScanSuccess(event: CustomEvent) {
     const { upc, message } = event.detail;
     console.log(`[SCANNER] Scan success for product: ${message}`);
-    scanFeedback = `✅ ${product.product_name} confirmed!`;
-    scanFeedbackType = 'success';
-    isScanned = true;
-    
+
+    // Mark as found in backend + send signal
+    await markItemScanned(SCAN_STATUS.FOUND);
+
     // Auto-close scanner after success
     setTimeout(() => {
       closeScanner();
@@ -50,8 +102,18 @@
     console.log(`[SCANNER] Scan error: ${message}`);
     scanFeedback = `❌ Wrong item. Expected: ${product.product_name}`;
     scanFeedbackType = 'error';
-    
+
     // Keep scanner open for retry
+  }
+
+  // Handle manual "Not Found" button
+  async function handleNotFound() {
+    await markItemScanned(SCAN_STATUS.NOT_FOUND);
+  }
+
+  // Handle "Mark as Found" (for reversing not_found or manual confirmation)
+  async function handleMarkFound() {
+    await markItemScanned(SCAN_STATUS.FOUND);
   }
 </script>
 
@@ -65,9 +127,9 @@
       <h1>Scan Product</h1>
       <p class="product-subtitle">Verify item for collection</p>
     </div>
-    {#if isScanned}
+    {#if isFound || isNotFound}
       <div class="scanned-indicator">
-        <CheckCircle size={24} color="#4caf50" />
+        <ScanStatusIcon status={scanStatus} size={24} />
       </div>
     {/if}
   </div>
@@ -96,31 +158,69 @@
 
   <!-- Scan Button -->
   <div class="scan-section">
-    {#if !isScanned && product.upc}
-      <button class="scan-button" on:click={openScanner}>
+    {#if isFound}
+      <!-- Item found -->
+      <div class="scan-complete">
+        <ScanStatusIcon status={SCAN_STATUS.FOUND} size={48} />
+        <h3>Item Confirmed!</h3>
+        <p>This product has been verified</p>
+        <div class="action-buttons">
+          <button class="rescan-button" on:click={openScanner} disabled={isUpdating || !product.upc}>
+            Scan Again
+          </button>
+          <button class="not-found-button" on:click={handleNotFound} disabled={isUpdating}>
+            Mark Not Found
+          </button>
+        </div>
+      </div>
+    {:else if isNotFound}
+      <!-- Item not found -->
+      <div class="scan-not-found">
+        <ScanStatusIcon status={SCAN_STATUS.NOT_FOUND} size={48} />
+        <h3>Item Not Found</h3>
+        <p>This product is marked as unavailable</p>
+        <div class="action-buttons">
+          <button class="found-button" on:click={handleMarkFound} disabled={isUpdating}>
+            Mark as Found
+          </button>
+          {#if product.upc}
+            <button class="rescan-button" on:click={openScanner} disabled={isUpdating}>
+              Scan to Verify
+            </button>
+          {/if}
+        </div>
+      </div>
+    {:else if product.upc}
+      <!-- Pending with UPC - can scan -->
+      <button class="scan-button" on:click={openScanner} disabled={isUpdating}>
         <Camera size={24} />
         <span>Scan Product Barcode</span>
       </button>
       <p class="scan-instructions">
         Scan the barcode to confirm you have the correct item
       </p>
-    {:else if isScanned}
-      <div class="scan-complete">
-        <CheckCircle size={48} color="#4caf50" />
-        <h3>Item Confirmed!</h3>
-        <p>This product has been successfully scanned</p>
-        <button class="rescan-button" on:click={() => { isScanned = false; openScanner(); }}>
-          Scan Again
+      <div class="action-buttons">
+        <button class="test-scan-button" on:click={handleMarkFound} disabled={isUpdating}>
+          TEST SCAN
+        </button>
+        <button class="not-found-button-secondary" on:click={handleNotFound} disabled={isUpdating}>
+          Item Not Available
         </button>
       </div>
     {:else}
+      <!-- Pending without UPC - manual only -->
       <div class="no-scan-available">
         <Package size={48} color="#757575" />
         <h3>Manual Verification</h3>
         <p>No barcode available for this item.<br>Please verify manually.</p>
-        <button class="manual-confirm-button" on:click={() => { isScanned = true; }}>
-          Mark as Collected
-        </button>
+        <div class="action-buttons">
+          <button class="manual-confirm-button" on:click={handleMarkFound} disabled={isUpdating}>
+            Mark as Found
+          </button>
+          <button class="not-found-button" on:click={handleNotFound} disabled={isUpdating}>
+            Not Available
+          </button>
+        </div>
       </div>
     {/if}
   </div>
@@ -419,5 +519,140 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+  }
+
+  /* Action buttons container */
+  .action-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+
+  /* Not found button (red) */
+  .not-found-button {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: var(--btn-border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: var(--btn-transition);
+  }
+
+  .not-found-button:hover:not(:disabled) {
+    background: #d32f2f;
+    transform: translateY(-1px);
+  }
+
+  .not-found-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Test scan button (for testing signals without Tauri) */
+  .test-scan-button {
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: var(--btn-border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: var(--btn-transition);
+  }
+
+  .test-scan-button:hover:not(:disabled) {
+    background: #1976d2;
+    transform: translateY(-1px);
+  }
+
+  .test-scan-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Secondary not found button (for pending state) */
+  .not-found-button-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--btn-border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: var(--btn-transition);
+  }
+
+  .not-found-button-secondary:hover:not(:disabled) {
+    background: var(--surface);
+    color: #f44336;
+    border-color: #f44336;
+  }
+
+  .not-found-button-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Found button (green) */
+  .found-button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: var(--btn-border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: var(--btn-transition);
+  }
+
+  .found-button:hover:not(:disabled) {
+    background: #45a049;
+    transform: translateY(-1px);
+  }
+
+  .found-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Not found state container */
+  .scan-not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .scan-not-found h3 {
+    margin: 0;
+    color: #f44336;
+    font-size: var(--btn-font-size-md);
+  }
+
+  .scan-not-found p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Disabled states for scan button */
+  .scan-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .rescan-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .manual-confirm-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 </style>
